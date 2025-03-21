@@ -91,6 +91,9 @@
 	# More info: <http://www.git-tower.com/blog/make-git-rebase-safe-on-osx/>
 	trustctime = false
 
+  # https://crates.io/crates/git-delta/0.11.0
+  pager = delta
+
 	# Prevent showing files whose names contain non-ASCII symbols as unversioned.
 	# http://michael-kuehnel.de/git/2014/11/21/git-mac-osx-and-german-umlaute.html
 	precomposeunicode = false
@@ -129,10 +132,19 @@
 	# https://help.github.com/articles/signing-commits-using-gpg/
 	gpgsign = true
 
+[delta]
+
+	# https://crates.io/crates/git-delta/0.11.0
+	plus-style = "syntax #012800"
+	minus-style = "syntax #340001"
+	navigate = true
+	theme = "Monokai Extended"
+	
 [diff]
 
 	# Detect copies as well as renames.
 	renames = copies
+	colormoved = default
 
 [diff "bin"]
 
@@ -144,10 +156,16 @@
 	# Automatically correct and execute mistyped commands.
 	autocorrect = 1
 
+[interactive]
+
+	# https://crates.io/crates/git-delta/0.11.0
+  diffFilter = delta --color-only
+
 [merge]
 
 	# Include summaries of merged commits in newly created merge commit messages
 	log = true
+	conflictstyle = diff3
 
 [push]
 
@@ -181,3 +199,9 @@
 [init]
 
 	defaultBranch = main
+
+[user]
+
+	# Use the email address associated with the GitHub account.
+	email = "dave.kujawski@gmail.com"
+	name = "Dave Kujawski"

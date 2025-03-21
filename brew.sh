@@ -97,5 +97,64 @@ brew install tree
 brew install vbindiff
 brew install zopfli
 
+# Install some that have been helpful in the past
+brew install act
+brew install ansible
+brew install awscli
+brew install bash
+brew install bash-completion@2
+brew install bat
+brew install cloc
+brew install cmake
+brew install cryptography
+brew install docker
+brew install docker-completion
+brew install ffmpeg
+brew install fzf
+brew install gh
+brew install ghostscript
+brew install git
+brew install git-delta
+brew install glow
+brew install gmp
+brew install gnupg
+brew install gnutls
+brew install go
+brew install grep
+brew install gaphviz
+brew install gts
+brew install htop
+brew install imagemagick
+brew install jira-cli
+brew install jq
+brew install ncurses
+brew install node
+brew install nvm
+brew install oath-toolkit
+brew install openexr
+brew install openjdk
+brew install openjpeg
+brew install openssl@3
+brew install okta-aws-cli
+brew install pyenv
+brew install readline
+brew install ripgrep
+brew install ruby
+brew install speedtest-cli
+brew install sqlite
+brew install starship
+brew install tcl-tk
+brew install terraform-docs
+brew install tfenv
+brew install tflint
+brew install tmux
+brew install tree
+brew install vim
+brew install wget
+brew install zlib
+brew install zsh
+
+
+
 # Remove outdated versions from the cellar.
 brew cleanup

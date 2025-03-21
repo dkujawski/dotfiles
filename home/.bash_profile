@@ -1,5 +1,5 @@
-# Add `~/bin` to the `$PATH`
-export PATH="$HOME/bin:$PATH";
+source "${HOME}/.local/share/bash/utility-functions.sh"
+source_file "${HOME}/.local/share/bash/paths.sh"
 
 # Load the shell dotfiles, and then some:
 # * ~/.path can be used to extend `$PATH`.

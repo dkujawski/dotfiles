@@ -1,13 +1,15 @@
-source "${HOME}/.local/share/bash/utility-functions.sh"
-source_file "${HOME}/.local/share/bash/paths.sh"
+CONF="$HOME/.local/share/bash"
+source "${CONF}/utility-functions.sh"
 
-# Load the shell dotfiles, and then some:
-# * ~/.path can be used to extend `$PATH`.
-# * ~/.extra can be used for other settings you don’t want to commit.
-for file in ~/.{path,bash_prompt,exports,aliases,functions,extra}; do
-	[ -r "$file" ] && [ -f "$file" ] && source "$file";
-done;
-unset file;
+source_file "${CONF}/paths.sh"
+source_file "${CONF}/exports.sh"
+source_file "${CONF}/load-secrets.sh"
+source_file "${CONF}/aliases.sh"
+source_file "${CONF}/functions.sh"
+source_file "${CONF}/git-functions.sh"
+unset CONF;
+
+source_file "${HOME}/.bash_prompt"
 
 # Case-insensitive globbing (used in pathname expansion)
 shopt -s nocaseglob;
@@ -48,3 +50,5 @@ complete -W "NSGlobalDomain" defaults;
 
 # Add `killall` tab completion for common apps
 complete -o "nospace" -W "Contacts Calendar Dock Finder Mail Safari iTunes SystemUIServer Terminal Twitter" killall;
+
+eval "$(/opt/homebrew/bin/brew shellenv)"

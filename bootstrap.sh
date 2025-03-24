@@ -1,19 +1,28 @@
 #!/usr/bin/env bash
 cd "$(dirname "${BASH_SOURCE}")";
-
-#git pull origin main;
+pwd;
+echo "Installing dotfiles...";
 
 function install_home() {
-	rsync -avh --no-perms ./home ~;
-	source ~/.bash_profile;
+	rsync -avhc --no-perms home/ ~/
 }
 
 function source_now() {
 	source ~/.bash_profile;
 }
 
+function install_brew() {
+    [ -d /opt/homebrew/bin ] && export PATH=$PATH:/opt/homebrew/bin
+    if ! command -v brew 2>&1 >/dev/null; then
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    else
+        echo "brew already installed!"
+    fi
+}
+
 function do_it() {
 	install_home;
+  install_brew;
 	source_now;
 }
 

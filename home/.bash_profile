@@ -1,3 +1,14 @@
+https://stackoverflow.com/a/394247/3406946
+platform='unknown'
+unamestr=$(uname)
+if [[ "$unamestr" == 'Linux' ]]; then
+   platform='linux'
+elif [[ "$unamestr" == 'Darwin' ]]; then
+   platform='darwin'
+elif [[ "$unamestr" == 'FreeBSD' ]]; then
+   platform='freebsd'
+fi
+
 source "${HOME}/.local/share/bash/utility-functions.sh"
 source_file "${HOME}/.local/share/bash/paths.sh"
 
@@ -42,9 +53,11 @@ fi;
 # Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
 [ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2- | tr ' ' '\n')" scp sftp ssh;
 
-# Add tab completion for `defaults read|write NSGlobalDomain`
-# You could just use `-g` instead, but I like being explicit
-complete -W "NSGlobalDomain" defaults;
+if [[ "$platform" == "darwin" ]]; then
+	# Add tab completion for `defaults read|write NSGlobalDomain`
+	# You could just use `-g` instead, but I like being explicit
+	complete -W "NSGlobalDomain" defaults;
 
-# Add `killall` tab completion for common apps
-complete -o "nospace" -W "Contacts Calendar Dock Finder Mail Safari iTunes SystemUIServer Terminal Twitter" killall;
+	# Add `killall` tab completion for common apps
+	complete -o "nospace" -W "Contacts Calendar Dock Finder Mail Safari SystemUIServer Terminal iTerm" killall;
+fi

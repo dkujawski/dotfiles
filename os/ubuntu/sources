@@ -1,0 +1,3 @@
+ -P ppa:mutlaqja/ppa
+ -S deb https://repo.protonvpn.com/debian stable main
+ -S deb http://us.archive.ubuntu.com/ubuntu/ noble noble-updates  main restricted universe multiverse

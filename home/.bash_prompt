@@ -16,16 +16,16 @@ if tput setaf 1 &> /dev/null; then
 	bold=$(tput bold);
 	reset=$(tput sgr0);
 	# Solarized colors, taken from http://git.io/solarized-colors.
-	black=$(tput setaf 0);
-	blue=$(tput setaf 33);
+	black=$(tput setaf 8);
+	blue=$(tput setaf 69);
 	cyan=$(tput setaf 37);
 	green=$(tput setaf 64);
-	orange=$(tput setaf 166);
-	purple=$(tput setaf 125);
-	red=$(tput setaf 124);
+	orange=$(tput setaf 130);
+	purple=$(tput setaf 140);
+	red=$(tput setaf 224);
 	violet=$(tput setaf 61);
 	white=$(tput setaf 15);
-	yellow=$(tput setaf 136);
+	yellow=$(tput setaf 100);
 else
 	bold='';
 	reset="\e[0m";
@@ -74,7 +74,7 @@ prompt_git() {
 	# Get the short symbolic ref. If HEAD isn’t a symbolic ref, get a
 	# tracking remote branch or tag. Otherwise, get the
 	# short SHA for the latest commit, or give up.
-	branchName="${violet}$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
+	branchName="$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
 		git describe --all --exact-match HEAD 2> /dev/null || \
 		git rev-parse --short HEAD 2> /dev/null || \
 		echo '(unknown)')";
@@ -84,31 +84,30 @@ prompt_git() {
 	# https://github.com/paulirish/dotfiles/blob/dd33151f/.bash_prompt#L110-L123
 	repoUrl="$(git config --get remote.origin.url)";
 
-	repoHost="${blue}" # 
+	repoHost=" " #  󰳏 
 	if grep -q 'github.com' <<< "${repoUrl}"; then
-		repoHost="${blue} "; #     
+		repoHost=" "; #      
 	fi;
-	[ -n "${repoHost}" ] && repoHost="${cyan}${repoHost} ";
 	# Check for uncommitted changes in the index.
 	if ! $(git diff --quiet --ignore-submodules --cached); then
-		s+="${white}󰒟";
+		s+="${white}󰜡"; # 󰎂 󰓎 󰗖 󰚽 󰜡 󰝧 󰫉 
 	fi;
 	# Check for unstaged changes.
 	if ! $(git diff-files --quiet --ignore-submodules --); then
-		s+="${cyan}󰶣";
+		s+="${green}󱇬"; # 󰐕 󰠠  󱇬 
 	fi;
 	# Check for untracked files.
 	if [ -n "$(git ls-files --others --exclude-standard)" ]; then
-		s+="${yellow}󰶼";
+		s+="${cyan}󰋖"; #‽ 󰋖 󰘥
 	fi;
 	# Check for stashed files.
 	if $(git rev-parse --verify refs/stash &>/dev/null); then
-		s+="${orange}󰯍";
+		s+="${orange}󰐣"; # 󰐣
 	fi;
 
 	[ -n "${s}" ] && s="${blue}[${s}${blue}]";
 
-	echo -e "${repoHost}${violet}${repoUrl##git*com:}${purple} ${branchName}${s}";
+	echo -e "${repoHost}${purple}${repoUrl##git*com:}${violet}  ${purple}${branchName}${s}";
 }
 
 # Highlight the user name when logged in as root.
@@ -137,7 +136,7 @@ PS1+="\[${hostStyle}\]\h"; # host
 PS1+="\[${white}\] ";
 PS1+="\[${blue}\]\w"; # working directory full path
 PS1+="\n";
-PS1+="\$(bottom_line)\[${violet}\] \! \[${reset}\]";
+PS1+="\$(bottom_line)\[${reset}\]";
 export PS1;
 
 PS2="\[${yellow}\]→ \[${reset}\]";

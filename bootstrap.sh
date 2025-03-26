@@ -21,7 +21,7 @@ function install_brew() {
 function do_it() {
 	install_home;
   install_brew;
-	source_now;
+	# source_now;
 }
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then

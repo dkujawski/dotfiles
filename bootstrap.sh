@@ -15,8 +15,6 @@ function install_brew() {
     [ -d /opt/homebrew/bin ] && export PATH=$PATH:/opt/homebrew/bin
     if ! command -v brew 2>&1 >/dev/null; then
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    else
-        echo "brew already installed!"
     fi
 }
 

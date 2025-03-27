@@ -127,7 +127,7 @@ bottom_line() {
 	echo -e "$(prompt_jobs)${reset}"; # `$` (and reset color)
 }
 # Set the terminal title and prompt.
-PS1="\[\033]0;\W\007\]"; # working directory base name
+PS1="";
 PS1+="\$(prompt_git)"; # Git repository details
 PS1+="\[${bold}\]\n"; # newline
 PS1+="\[${userStyle}\]\u"; # username
@@ -135,8 +135,8 @@ PS1+="\[${white}\]󰧟";
 PS1+="\[${hostStyle}\]\h"; # host
 PS1+="\[${white}\] ";
 PS1+="\[${blue}\]\w"; # working directory full path
-PS1+="\n";
-PS1+="\$(bottom_line)\[${reset}\]";
+PS1+="\n\$(prompt_jobs)"
+PS1+="\[${blue}\]>\[${reset}\]";
 export PS1;
 
 PS2="\[${yellow}\]→ \[${reset}\]";

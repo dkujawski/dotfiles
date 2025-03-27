@@ -12,6 +12,8 @@ set mark-symlinked-directories on
 "\e[A": history-search-backward
 "\e[B": history-search-forward
 
+set history-preserve-point on
+
 # Do not autocomplete hidden files unless the pattern explicitly begins with a dot
 set match-hidden-files off
 
@@ -23,6 +25,8 @@ set completion-query-items 200
 
 # Show extra file information when completing, like `ls -F` does
 set visible-stats on
+set colored-completion-prefix on
+set colored-stats on
 
 # Be more intelligent when autocompleting by also looking at the text after
 # the cursor. For example, when the current line is "cd ~/src/mozil", and

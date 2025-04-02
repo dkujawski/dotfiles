@@ -215,7 +215,10 @@ function command_exists {
 # --------------------------------------------------------------------------------------
 
 function source_file {
-  [[ -r "${1}" ]] && run_with_spinner source "${1}"
+  if command -v sha256sum >/dev/null 2>&1; then
+    [[ -r "${1}" ]] && run_with_spinner source "${1}"
+  fi
+  [[ -r "${1}" ]] && source "${1}"
 }
 
 

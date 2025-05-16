@@ -1,27 +1,37 @@
 #!/usr/bin/env bash
 # Load Secrets from 1Password
 
-# Signin to 1Password; either via the app integration with the native app
-# or using the interactive signin process
-export OP_ACCOUNT="foxcorporation.1password.com"
-eval "$(op signin)"
+# Debug logging function (if not already defined)
+if ! type debug_log >/dev/null 2>&1; then
+    debug_log() {
+        if [ "$DEBUG" = "1" ] || [ "$DEBUG" = "true" ]; then
+            echo "[DEBUG] $*" >&2
+        fi
+    }
+fi
 
-# URL encoded email address
-export FOX_EMAIL="${USER}%40fox.com"
+debug_log "Starting 1Password secrets loading"
 
-## GitHub
-GITHUB_TOKEN="$(op read op://Private/github-token/credential)"
-export GITHUB_TOKEN
+# Run the load-secrets binary with a timeout
+if ! secrets_output=$(timeout 30s load-secrets 2>&1); then
+    if [ $? -eq 124 ]; then
+        echo "Error: load-secrets command timed out after 30 seconds" >&2
+        exit 1
+    else
+        echo "Error: load-secrets command failed" >&2
+        exit 1
+    fi
+fi
 
-## Confluence
-CONFLUENCE_USER="$(op read op://Private/confluence-token/username)"
-CONFLUENCE_API_TOKEN="$(op read op://Private/confluence-token/credential)"
-export CONFLUENCE_USER
-export CONFLUENCE_API_TOKEN
+# Process the output line by line
+while IFS= read -r line; do
+    if [[ $line == \[DEBUG\]* ]]; then
+        # Handle debug lines
+        echo "$line" >&2
+    else
+        # Handle export commands
+        eval "$line"
+    fi
+done <<< "$secrets_output"
 
-ATLASSIAN_TOKEN="$(op read op://Private/ATLASSIAN_API_TOKEN/credential)"
-export ATLASSIAN_TOKEN
-export JIRA_API_TOKEN=$ATLASSIAN_TOKEN
-
-ARTIFACTORY_TOKEN="$(op read op://Employee/Artifactory\ DPE/credential)"
-export ARTIFACTORY_TOKEN
+debug_log "Completed loading all secrets"

@@ -28,4 +28,9 @@ Cargo.lock
 
 # Debug files
 *.debug
-*.profraw 
+*.profraw
+
+# Cache and encryption files
+.cache/
+**/.key
+*.enc

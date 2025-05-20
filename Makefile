@@ -3,6 +3,15 @@
 # Default target
 all: build-load-secrets deploy-load-secrets install-dotfiles install-brew 
 
+
+
+# Install build dependencies
+install-deps:
+	@if ! command -v cargo 2>&1 >/dev/null; then \
+		/bin/bash -c "$$(curl https://sh.rustup.rs -sSf)"; \
+	fi
+
+
 # Install dotfiles to home directory
 install-dotfiles:
 	@echo "Installing dotfiles..."

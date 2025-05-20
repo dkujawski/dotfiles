@@ -6,6 +6,12 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde::{Deserialize, Serialize};
 use tokio::process::Command as AsyncCommand;
 use anyhow::{Context, Result};
+use aes_gcm::{
+    aead::{Aead, KeyInit},
+    Aes256Gcm, Key,
+};
+use rand::{Rng, rngs::OsRng};
+use aes_gcm::aead::generic_array::GenericArray;
 
 #[derive(Serialize, Deserialize)]
 struct CachedSecret {
@@ -17,6 +23,7 @@ struct CachedSecret {
 struct SecretCache {
     cache_dir: PathBuf,
     ttl_minutes: u64,
+    cipher: Aes256Gcm,
 }
 
 impl SecretCache {
@@ -30,17 +37,35 @@ impl SecretCache {
         
         fs::create_dir_all(&cache_dir)
             .with_context(|| format!("Failed to create cache directory: {:?}", cache_dir))?;
+
+        // Generate or load encryption key
+        let key_path = cache_dir.join(".key");
+        let key = if key_path.exists() {
+            let key_data = fs::read(&key_path)
+                .with_context(|| "Failed to read encryption key")?;
+            Key::<Aes256Gcm>::clone_from_slice(&key_data)
+        } else {
+            let mut key_bytes = [0u8; 32];
+            OsRng.fill(&mut key_bytes);
+            let key = Key::<Aes256Gcm>::clone_from_slice(&key_bytes);
+            fs::write(&key_path, key_bytes)
+                .with_context(|| "Failed to write encryption key")?;
+            key
+        };
+        
+        let cipher = Aes256Gcm::new(&key);
         
         Ok(Self {
             cache_dir,
             ttl_minutes,
+            cipher,
         })
     }
 
     fn get_cache_path(&self, item: &str) -> PathBuf {
         let mut path = self.cache_dir.clone();
         path.push(format!("{:x}", md5::compute(item)));
-        path.set_extension("json");
+        path.set_extension("enc");
         path
     }
 
@@ -50,20 +75,37 @@ impl SecretCache {
             return None;
         }
 
-        match fs::read_to_string(&cache_path) {
-            Ok(content) => {
-                match serde_json::from_str::<CachedSecret>(&content) {
-                    Ok(cached) => {
-                        let now = SystemTime::now()
-                            .duration_since(UNIX_EPOCH)
-                            .unwrap()
-                            .as_secs();
-                        
-                        if now - cached.timestamp > self.ttl_minutes * 60 {
-                            let _ = fs::remove_file(&cache_path);
-                            None
-                        } else {
-                            Some(cached.value)
+        match fs::read(&cache_path) {
+            Ok(encrypted_data) => {
+                // First 12 bytes are the nonce
+                if encrypted_data.len() < 12 {
+                    let _ = fs::remove_file(&cache_path);
+                    return None;
+                }
+                
+                let (nonce_bytes, ciphertext) = encrypted_data.split_at(12);
+                let nonce = GenericArray::clone_from_slice(nonce_bytes);
+                
+                match self.cipher.decrypt(&nonce, ciphertext) {
+                    Ok(decrypted_data) => {
+                        match serde_json::from_str::<CachedSecret>(&String::from_utf8_lossy(&decrypted_data)) {
+                            Ok(cached) => {
+                                let now = SystemTime::now()
+                                    .duration_since(UNIX_EPOCH)
+                                    .unwrap()
+                                    .as_secs();
+                                
+                                if now - cached.timestamp > self.ttl_minutes * 60 {
+                                    let _ = fs::remove_file(&cache_path);
+                                    None
+                                } else {
+                                    Some(cached.value)
+                                }
+                            }
+                            Err(_) => {
+                                let _ = fs::remove_file(&cache_path);
+                                None
+                            }
                         }
                     }
                     Err(_) => {
@@ -88,8 +130,22 @@ impl SecretCache {
             value: value.to_string(),
         };
         
-        let content = serde_json::to_string(&cached)?;
-        fs::write(&cache_path, content)
+        let json_data = serde_json::to_string(&cached)?;
+        
+        // Generate a random nonce
+        let mut nonce_bytes = [0u8; 12];
+        OsRng.fill(&mut nonce_bytes);
+        let nonce = GenericArray::clone_from_slice(&nonce_bytes);
+        
+        // Encrypt the data
+        let ciphertext = self.cipher.encrypt(&nonce, json_data.as_bytes())
+            .map_err(|e| anyhow::anyhow!("Failed to encrypt cache data: {}", e))?;
+        
+        // Combine nonce and ciphertext
+        let mut encrypted_data = nonce_bytes.to_vec();
+        encrypted_data.extend_from_slice(&ciphertext);
+        
+        fs::write(&cache_path, encrypted_data)
             .with_context(|| format!("Failed to write cache file: {:?}", cache_path))
     }
 }

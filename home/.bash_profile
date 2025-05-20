@@ -33,6 +33,9 @@ unset CONF;
 source_file "${HOME}/.bash_prompt"
 debug_log "Loaded bash prompt"
 
+source_file "${HOME}/.cargo/env"
+debug_log "Loaded cargo env"
+
 # Case-insensitive globbing (used in pathname expansion)
 shopt -s nocaseglob;
 debug_log "Enabled case-insensitive globbing"
@@ -94,3 +97,8 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 debug_log "Loaded NVM environment"
+
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - bash)"

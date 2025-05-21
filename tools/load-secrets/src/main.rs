@@ -150,6 +150,57 @@ impl SecretCache {
     }
 }
 
+async fn check_session() -> Result<bool> {
+    if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
+        eprintln!("[DEBUG] Checking 1Password session status");
+    }
+
+    match run_op_command(&["whoami"]).await {
+        Ok(_) => {
+            if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
+                eprintln!("[DEBUG] Valid session found");
+            }
+            Ok(true)
+        }
+        Err(e) => {
+            if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
+                eprintln!("[DEBUG] No valid session: {}", e);
+            }
+            Ok(false)
+        }
+    }
+}
+
+async fn ensure_authenticated() -> Result<()> {
+    if !check_session().await? {
+        if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
+            eprintln!("[DEBUG] Attempting to sign in to 1Password");
+        }
+        
+        let signin_output = tokio::time::timeout(
+            std::time::Duration::from_secs(10),
+            AsyncCommand::new("op")
+                .arg("signin")
+                .output()
+        ).await
+        .context("Signin command timed out after 10 seconds")?
+        .context("Failed to execute op signin")?;
+
+        if !signin_output.status.success() {
+            let signin_error = String::from_utf8_lossy(&signin_output.stderr);
+            if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
+                eprintln!("[DEBUG] Sign in failed: {}", signin_error);
+            }
+            return Err(anyhow::anyhow!("Failed to sign in to 1Password: {}", signin_error));
+        }
+
+        if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
+            eprintln!("[DEBUG] Sign in successful");
+        }
+    }
+    Ok(())
+}
+
 async fn run_op_command(args: &[&str]) -> Result<String> {
     if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
         eprintln!("[DEBUG] Running op command with args: {:?}", args);
@@ -177,60 +228,7 @@ async fn run_op_command(args: &[&str]) -> Result<String> {
         if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
             eprintln!("[DEBUG] Command failed with error: {}", error);
         }
-        if error.contains("You are not currently signed in") {
-            // Try to sign in again
-            if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
-                eprintln!("[DEBUG] Attempting to sign in to 1Password");
-            }
-            
-            // Add timeout for signin command
-            let signin_output = tokio::time::timeout(
-                std::time::Duration::from_secs(10),
-                AsyncCommand::new("op")
-                    .arg("signin")
-                    .output()
-            ).await
-            .context("Signin command timed out after 10 seconds")?
-            .context("Failed to execute op signin")?;
-
-            if !signin_output.status.success() {
-                let signin_error = String::from_utf8_lossy(&signin_output.stderr);
-                if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
-                    eprintln!("[DEBUG] Sign in failed: {}", signin_error);
-                }
-                return Err(anyhow::anyhow!("Failed to sign in to 1Password: {}", signin_error));
-            }
-
-            if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
-                eprintln!("[DEBUG] Sign in successful, retrying original command");
-            }
-
-            // Retry the original command after successful sign in
-            let retry_output = tokio::time::timeout(
-                std::time::Duration::from_secs(10),
-                AsyncCommand::new("op")
-                    .args(args)
-                    .output()
-            ).await
-            .context("Retry command timed out after 10 seconds")?
-            .context("Failed to execute op command after signin")?;
-
-            if retry_output.status.success() {
-                let result = String::from_utf8_lossy(&retry_output.stdout).trim().to_string();
-                if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
-                    eprintln!("[DEBUG] Retry succeeded with output: {}", result);
-                }
-                Ok(result)
-            } else {
-                let retry_error = String::from_utf8_lossy(&retry_output.stderr);
-                if env::var("DEBUG").map_or(false, |v| v == "1" || v == "true") {
-                    eprintln!("[DEBUG] Retry failed with error: {}", retry_error);
-                }
-                Err(anyhow::anyhow!("op command failed after signin: {}", retry_error))
-            }
-        } else {
-            Err(anyhow::anyhow!("op command failed: {}", error))
-        }
+        Err(anyhow::anyhow!("op command failed: {}", error))
     }
 }
 
@@ -286,6 +284,9 @@ async fn main() -> Result<()> {
     if debug {
         eprintln!("[DEBUG] Set FOX_EMAIL to: {}", fox_email);
     }
+
+    // Ensure we're authenticated before proceeding
+    ensure_authenticated().await?;
 
     // Initialize cache
     let cache = SecretCache::new(None, 30)?;

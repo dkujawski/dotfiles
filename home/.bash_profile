@@ -3,6 +3,8 @@ if [ -z "$DEBUG" ]; then
     DEBUG=0
 fi
 
+shopt -s checkwinsize
+
 # Debug logging function
 debug_log() {
     if [ "$DEBUG" = "1" ] || [ "$DEBUG" = "true" ]; then

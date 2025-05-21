@@ -380,3 +380,39 @@ spinner() {
   done
   printf " \b\b"
 }
+
+# --------------------------------------------------------------------------------------
+# Source with Spinner
+# --------------------------------------------------------------------------------------
+
+function source_with_spinner {
+  local file="$1"
+  local message="${2:-Sourcing ${file}...}"
+  
+  if [[ ! -r "$file" ]]; then
+    echo_error "Cannot read file: $file"
+    return 1
+  fi
+
+  # Start the spinner in the background
+  (
+    local spinstr='⠋⠙⠚⠒⠂⠂⠒⠲⠴⠦⠖⠒⠐⠐⠒⠓⠋'
+    local i=0
+    while true; do
+      printf "\r${blueb}${message}${end} ${spinstr:i++%${#spinstr}:1}"
+      sleep 0.1
+    done
+  ) & local spinner_pid=$!
+
+  # Source the file
+  source "$file"
+  local source_status=$?
+
+  # Kill the spinner
+  kill $spinner_pid 2>/dev/null
+  wait $spinner_pid 2>/dev/null
+  printf "\r\033[K" # Clear the line
+
+  # Return the status of the source command
+  return $source_status
+}

@@ -16,24 +16,24 @@ debug_log "Loading configuration from: $CONF"
 source "${CONF}/utility-functions.sh"
 debug_log "Loaded utility functions"
 
-source_file "${CONF}/paths.sh"
+source_with_spinner "${CONF}/paths.sh" "Loading paths configuration..."
 debug_log "Loaded paths"
-source_file "${CONF}/exports.sh"
+source_with_spinner "${CONF}/exports.sh" "Loading environment exports..."
 debug_log "Loaded exports"
-source_file "${CONF}/load-secrets.sh"
+source_with_spinner "${CONF}/load-secrets.sh" "Loading secrets..."
 debug_log "Loaded secrets"
-source_file "${CONF}/aliases.sh"
+source_with_spinner "${CONF}/aliases.sh" "Loading aliases..."
 debug_log "Loaded aliases"
-source_file "${CONF}/functions.sh"
+source_with_spinner "${CONF}/functions.sh" "Loading functions..."
 debug_log "Loaded functions"
-source_file "${CONF}/git-functions.sh"
+source_with_spinner "${CONF}/git-functions.sh" "Loading git functions..."
 debug_log "Loaded git functions"
 unset CONF;
 
-source_file "${HOME}/.bash_prompt"
+source_with_spinner "${HOME}/.bash_prompt" "Loading bash prompt..."
 debug_log "Loaded bash prompt"
 
-source_file "${HOME}/.cargo/env"
+source_with_spinner "${HOME}/.cargo/env" "Loading cargo environment..."
 debug_log "Loaded cargo env"
 
 # Case-insensitive globbing (used in pathname expansion)

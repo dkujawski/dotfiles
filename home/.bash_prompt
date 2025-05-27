@@ -176,12 +176,18 @@ prompt_git_repo() {
 }
 # Set the terminal title and prompt.
 PS1="";
-PS1+="\$(prompt_git_branch)\n";
-PS1+="\$(prompt_git_repo)"; # Git repository details
-PS1+="\$(if git rev-parse --is-inside-work-tree &>/dev/null; then git rev-parse --show-prefix; else echo -n '\w'; fi)"; # Show relative path in git or full path otherwise
+# Wrap the entire prompt in \[ \] to ensure proper line wrapping and history search
+PS1+="\[";
+# Only show git info when in a git repo
+PS1+="\$(if git rev-parse --is-inside-work-tree &>/dev/null; then prompt_git_branch; fi)\n";
+PS1+="\$(if git rev-parse --is-inside-work-tree &>/dev/null; then prompt_git_repo; fi)"; # Git repository details
+# Show relative path in git or full path otherwise
+PS1+="\$(if git rev-parse --is-inside-work-tree &>/dev/null; then git rev-parse --show-prefix; else echo -n '\w'; fi)";
 PS1+="\$(prompt_prev)\$(prompt_jobs)"
-PS1+="\[${yellow}\]>\[${reset}\] ";
+PS1+="${yellow}>${reset}";
+PS1+="\] ";
 export PS1;
 
-PS2="\[${yellow}\]${gitArrowSymbol} \[${reset}\]";
+# Secondary prompt for command continuation
+PS2="\[${yellow}${gitArrowSymbol} ${reset}\] ";
 export PS2;

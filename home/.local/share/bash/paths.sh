@@ -26,7 +26,7 @@ path_append "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 # pyenv
 if [[ -d "${HOME}/.pyenv" ]]; then
     export PYENV_ROOT="${HOME}/.pyenv"
-    path_append "${PYENV_ROOT}/bin"
+    path_append "${PYENV_ROOT}/shims"
 fi
 
 

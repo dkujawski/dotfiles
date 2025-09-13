@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 cd "$(dirname "${BASH_SOURCE}")";
+pwd;
+echo "Installing dotfiles...";
 
-function do_it() {
-	rsync -avh --no-perms ./home ~;
-	source ~/.bash_profile;
+function install_home() {
+	rsync -avhc --no-perms home/ ~/
 }
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then

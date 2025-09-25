@@ -109,8 +109,11 @@ brew install bat
 brew install cloc
 brew install cmake
 brew install cryptography
-brew install docker
-brew install docker-completion
+#brew install docker
+#brew install docker-completion
+brew install podman
+brew install podman-completion
+brew install podman-desktop
 brew install ffmpeg
 brew install fzf
 brew install gh

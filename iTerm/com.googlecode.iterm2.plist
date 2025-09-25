@@ -16,6 +16,8 @@
 	<integer>2</integer>
 	<key>AIVectorStore</key>
 	<integer>1</integer>
+	<key>AIVendor</key>
+	<integer>2</integer>
 	<key>AdjustWindowForFontSizeChange</key>
 	<false/>
 	<key>AiMaxTokens</key>
@@ -26,6 +28,8 @@
 	<integer>32768</integer>
 	<key>AitermURL</key>
 	<string>https://api.openai.com/v1/responses</string>
+	<key>AllowClipboardAccess</key>
+	<true/>
 	<key>ClickToSelectCommand</key>
 	<false/>
 	<key>CloseBookmarksWindowAfterOpening</key>
@@ -458,7 +462,7 @@
 	<key>Default Bookmark Guid</key>
 	<string>7D81F453-B784-4736-A8C3-D72FB70A43B6</string>
 	<key>Default Browser Profile Guid</key>
-	<string>BEE7F9E0-1CB3-4920-A8D2-006CF9DA52CF</string>
+	<string>D96E0AC8-F81D-403F-B340-AD86E923E088</string>
 	<key>DimInactiveSplitPanes</key>
 	<true/>
 	<key>DisableFullscreenTransparency</key>
@@ -473,12 +477,16 @@
 	<true/>
 	<key>HapticFeedbackForEsc</key>
 	<false/>
+	<key>HdrCursor</key>
+	<false/>
 	<key>HideScrollbar</key>
 	<false/>
 	<key>HotkeyMigratedFromSingleToMulti</key>
 	<true/>
 	<key>IRMemory</key>
 	<integer>4</integer>
+	<key>NeverBlockSystemShutdown</key>
+	<true/>
 	<key>NeverWarnAboutShortLivedSessions_7D81F453-B784-4736-A8C3-D72FB70A43B6</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_7D81F453-B784-4736-A8C3-D72FB70A43B6_selection</key>
@@ -5151,6 +5159,8 @@
 			</array>
 			<key>Terminal Type</key>
 			<string>xterm-256color</string>
+			<key>Timestamps Style</key>
+			<integer>2</integer>
 			<key>Transparency</key>
 			<real>0.0</real>
 			<key>Unicode Normalization</key>
@@ -6838,6 +6848,12 @@
 			<string>/Users/dave.kujawski/Repos/github.com/foxcorp</string>
 		</dict>
 	</array>
+	<key>OpenArrangementAtStartup</key>
+	<false/>
+	<key>OpenBookmark</key>
+	<true/>
+	<key>OpenNoWindowsAtStartup</key>
+	<true/>
 	<key>OpenTmuxWindowsIn</key>
 	<integer>0</integer>
 	<key>PointerActions</key>
@@ -6890,12 +6906,14 @@
 	<key>TabStyleWithAutomaticOption</key>
 	<integer>4</integer>
 	<key>TabsHaveCloseButton</key>
-	<false/>
+	<true/>
 	<key>ToolbeltTools</key>
 	<array>
 		<string>Command History</string>
 	</array>
 	<key>UseBorder</key>
+	<true/>
+	<key>UseRecommendedAIModel</key>
 	<false/>
 	<key>VisualIndicatorForEsc</key>
 	<false/>

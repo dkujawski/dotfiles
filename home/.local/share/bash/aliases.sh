@@ -16,9 +16,6 @@ alias r="cd ~/Repos"
 # alias p="cd ~/projects"
 alias g="git"
 
-# Use podman as docker if podman is installed
-command -v podman > /dev/null && alias docker="podman"
-
 # Detect which `ls` flavor is in use
 if ls --color > /dev/null 2>&1; then # GNU `ls`
 	colorflag="--color"

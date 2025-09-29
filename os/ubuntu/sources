@@ -1,3 +1,1 @@
- -P ppa:mutlaqja/ppa
- -S deb https://repo.protonvpn.com/debian stable main
- -S deb http://us.archive.ubuntu.com/ubuntu/ noble noble-updates  main restricted universe multiverse
+-S deb [signed-by=/usr/share/keyrings/protonvpn-archive-keyring.gpg] https://repo.protonvpn.com/debian stable main

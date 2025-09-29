@@ -1,0 +1,18 @@
+# Default 1Password paths configuration
+paths:
+  - uri: "op://Private/github-token/credential"
+    env: "GITHUB_TOKEN"
+    is_ref: true
+  - uri: "op://Private/confluence-token/username"
+    env: "CONFLUENCE_USER"
+    is_ref: true
+  - uri: "op://Private/confluence-token/credential"
+    env: "CONFLUENCE_API_TOKEN"
+    is_ref: true
+  - uri: "op://Private/ATLASSIAN_API_TOKEN/credential"
+    env: "ATLASSIAN_TOKEN"
+    is_ref: true
+    aliases: ["JIRA_API_TOKEN"]
+  - uri: "op://Employee/Artifactory DPE/credential"
+    env: "ARTIFACTORY_TOKEN"
+    is_ref: true 

@@ -1,32 +1,26 @@
 #!/usr/bin/env bash
 cd "$(dirname "${BASH_SOURCE}")"
 pwd
-echo "Installing dotfiles using Makefile..."
+echo "Installing dotfiles..."
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then
     make force
 else
-    read -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " -n 1
+    read -p "This may overwrite existing files in your home directory. Are you sure? (y/N) " -n 1
     echo ""
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         make all
+    else
+        echo "Exiting"
+        exit 1
     fi
 fi
 
-platform='unknown'
-unamestr=$(uname)
-if [[ "$unamestr" == 'Linux' ]]; then
-    platform='linux'
-elif [[ "$unamestr" == 'Darwin' ]]; then
-    platform='darwin'
-elif [[ "$unamestr" == 'FreeBSD' ]]; then
-    platform='freebsd'
+HOME_DIR=$(getent passwd "$USER" | cut -d: -f6)
+if [ -n "$HOME_DIR" ]; then
+    export HOME="$HOME_DIR"
+else
+    echo "Error: Could not determine home directory."
+    exit 1
 fi
-
-if [[ "$platform" == 'linux' ]]; then
-    ./os/ubuntu/apt.sh
-elif [[ "$platform" == "darwin" ]]; then
-    cp os/macos/.macos ~/
-    source ~/.macos
-    ./os/macos/brew.sh
-fi
+./os/ubuntu/apt.sh

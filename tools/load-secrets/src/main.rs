@@ -271,10 +271,12 @@ async fn main() -> Result<()> {
         eprintln!("[DEBUG] Starting 1Password secrets loading");
     }
 
-    // Set up 1Password account
-    env::set_var("OP_ACCOUNT", "foxcorporation.1password.com");
-    if debug {
-        eprintln!("[DEBUG] Using 1Password account: {}", env::var("OP_ACCOUNT").unwrap());
+    // Set up 1Password account if not already set
+    if env::var("OP_ACCOUNT").is_err() {
+        env::set_var("OP_ACCOUNT", "foxcorporation.1password.com");
+        if debug {
+            eprintln!("[DEBUG] Using 1Password account: {}", env::var("OP_ACCOUNT").unwrap());
+        }
     }
 
     // Set email

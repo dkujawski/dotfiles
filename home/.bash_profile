@@ -1,93 +1,25 @@
-# Enable/disable debug logging
-if [ -z "$DEBUG" ]; then
-    DEBUG=0
-fi
+# ~/.bash_profile
+# Login shell bootstrap used across interactive and non-interactive sessions.
 
-shopt -s checkwinsize
-
-# Debug logging function
-debug_log() {
-    if [ "$DEBUG" = "1" ] || [ "$DEBUG" = "true" ]; then
-        echo "[DEBUG] $1"
-    fi
+source_if_exists() {
+  [ -r "$1" ] && . "$1"
 }
 
-CONF="$HOME/.local/share/bash"
-debug_log "Loading configuration from: $CONF"
+# POSIX-friendly profile overrides (if present).
+source_if_exists "$HOME/.profile"
 
-source "${CONF}/utility-functions.sh"
-debug_log "Loaded utility functions"
-
-source_with_spinner "${CONF}/paths.sh" "Loading paths configuration..."
-debug_log "Loaded paths"
-source_with_spinner "${CONF}/exports.sh" "Loading environment exports..."
-debug_log "Loaded exports"
-source_with_spinner "${CONF}/load-secrets.sh" "Loading secrets..."
-debug_log "Loaded secrets"
-source_with_spinner "${CONF}/aliases.sh" "Loading aliases..."
-debug_log "Loaded aliases"
-source_with_spinner "${CONF}/functions.sh" "Loading functions..."
-debug_log "Loaded functions"
-source_with_spinner "${CONF}/git-functions.sh" "Loading git functions..."
-debug_log "Loaded git functions"
-unset CONF;
-
-source_with_spinner "${HOME}/.bash_prompt" "Loading bash prompt..."
-debug_log "Loaded bash prompt"
-
-source_with_spinner "${HOME}/.cargo/env" "Loading cargo environment..."
-debug_log "Loaded cargo env"
-
-# Case-insensitive globbing (used in pathname expansion)
-shopt -s nocaseglob;
-debug_log "Enabled case-insensitive globbing"
-
-# Append to the Bash history file, rather than overwriting it
-shopt -s histappend;
-debug_log "Enabled history append mode"
-
-# Autocorrect typos in path names when using `cd`
-shopt -s cdspell;
-debug_log "Enabled cd spell correction"
-
-# trying to fix history scroll issues. XON/XOFF flow control is disabled
-stty -ixon
-debug_log "Disabled XON/XOFF flow control"
-
-# Enable some Bash 4 features when possible:
-# * `autocd`, e.g. `**/qux` will enter `./foo/bar/baz/qux`
-# * Recursive globbing, e.g. `echo **/*.txt`
-for option in autocd globstar; do
-	shopt -s "$option" 2> /dev/null;
-	debug_log "Enabled bash option: $option"
-done;
-
-# Add tab completion for many Bash commands
-if which brew &> /dev/null && [ -r "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]; then
-	debug_log "Loading Homebrew bash completion"
-	# Ensure existing Homebrew v1 completions continue to work
-	export BASH_COMPLETION_COMPAT_DIR="$(brew --prefix)/etc/bash_completion.d";
-	source "$(brew --prefix)/etc/profile.d/bash_completion.sh";
-elif [ -f /etc/bash_completion ]; then
-	debug_log "Loading system bash completion"
-	source /etc/bash_completion;
-fi;
-
-# Enable tab completion for `g` by marking it as an alias for `git`
-if type _git &> /dev/null; then
-	complete -o default -o nospace -F _git g;
-	debug_log "Enabled git tab completion for 'g' alias"
-fi;
-
-# Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
-[ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2- | tr ' ' '\n')" scp sftp ssh;
-debug_log "Enabled SSH hostname completion"
-
-if [[ "$platform" == "darwin" ]]; then
-	# Add tab completion for `defaults read|write NSGlobalDomain`
-	# You could just use `-g` instead, but I like being explicit
-	complete -W "NSGlobalDomain" defaults;
-
-	# Add `killall` tab completion for common apps
-	complete -o "nospace" -W "Contacts Calendar Dock Finder Mail Safari SystemUIServer Terminal iTerm" killall;
+# Only run the secrets loader once per shell session.
+if [[ -z ${DOTFILES_SECRETS_LOADED:-} ]]; then
+  source_if_exists "$HOME/.local/share/bash/load-secrets.sh"
+  export DOTFILES_SECRETS_LOADED=1
 fi
+
+case $- in
+  *i*)
+    source_if_exists "$HOME/.bashrc"
+    ;;
+  *)
+    ;;
+esac
+
+unset -f source_if_exists

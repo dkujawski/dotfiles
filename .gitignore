@@ -34,3 +34,4 @@ Cargo.lock
 .cache/
 **/.key
 *.enc
+.aider*

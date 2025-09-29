@@ -44,6 +44,10 @@ else
 	yellow="\e[1;33m";
 fi;
 
+# Printable prompt markers
+readonly prompt_np_start=$'\001'
+readonly prompt_np_end=$'\002'
+
 # Git prompt symbols (ASCII for broad compatibility)
 gitBranchLabel='git:'
 gitDirtySymbol='*'
@@ -52,28 +56,28 @@ gitAheadSymbol='>'
 gitBehindSymbol='<'
 gitDivergedSymbol='!'
 
-prompt_prev() {
+__prompt_prev() {
 	local exit_code=$?;
 	if [ $exit_code -ne 0 ]; then
-		printf " \\[%b\\]!%d\\[%b\\]" "${red}" "$exit_code" "${reset}";
+		printf ' %s!%d%s' "${prompt_np_start}${red}${prompt_np_end}" "$exit_code" "${prompt_np_start}${reset}${prompt_np_end}";
 	else
-		printf " \\[%b\\]ok\\[%b\\]" "${green}" "${reset}";
+		printf ' %sok%s' "${prompt_np_start}${green}${prompt_np_end}" "${prompt_np_start}${reset}${prompt_np_end}";
 	fi;
 }
 # Show repo-relative path when inside Git, otherwise a home-shortened absolute path.
-prompt_path() {
+__prompt_path() {
 	local path='';
 	if git rev-parse --is-inside-work-tree &>/dev/null; then
 		path=$(git rev-parse --show-prefix 2>/dev/null);
-		printf "\\[%b\\]%s\\[%b\\]" "${purple}" "${path:-./}" "${reset}";
+		printf '%s%s%s' "${prompt_np_start}${purple}${prompt_np_end}" "${path:-./}" "${prompt_np_start}${reset}${prompt_np_end}";
 	else
 		path="${PWD/#$HOME/~}";
-		printf "\\[%b\\]%s\\[%b\\]" "${purple}" "$path" "${reset}";
+		printf '%s%s%s' "${prompt_np_start}${purple}${prompt_np_end}" "$path" "${prompt_np_start}${reset}${prompt_np_end}";
 	fi;
 }
 
 # Print a single-line git summary with branch, change, and upstream indicators.
-prompt_git_info() {
+__prompt_git_info() {
 	local branchName='';
 	local branchDisplay='';
 	local statusOutput='';
@@ -97,9 +101,9 @@ prompt_git_info() {
 
 	statusOutput="$(git status --porcelain --ignore-submodules 2>/dev/null)";
 	if [ -n "$statusOutput" ]; then
-		changeIndicator="\\[${yellow}\\]${gitDirtySymbol}\\[${reset}\\]";
+		changeIndicator="${prompt_np_start}${yellow}${prompt_np_end}${gitDirtySymbol}${prompt_np_start}${reset}${prompt_np_end}";
 	else
-		changeIndicator="\\[${green}\\]${gitCleanSymbol}\\[${reset}\\]";
+		changeIndicator="${prompt_np_start}${green}${prompt_np_end}${gitCleanSymbol}${prompt_np_start}${reset}${prompt_np_end}";
 	fi;
 
 	upstream="$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null)";
@@ -107,15 +111,15 @@ prompt_git_info() {
 		ahead=$(git rev-list --count "${upstream}..HEAD" 2>/dev/null || echo 0);
 		behind=$(git rev-list --count "HEAD..${upstream}" 2>/dev/null || echo 0);
 		if [ "$ahead" -gt 0 ] && [ "$behind" -gt 0 ]; then
-			remoteIndicator="\\[${yellow}\\]${gitDivergedSymbol}\\[${reset}\\]";
+			remoteIndicator="${prompt_np_start}${yellow}${prompt_np_end}${gitDivergedSymbol}${prompt_np_start}${reset}${prompt_np_end}";
 		elif [ "$ahead" -gt 0 ]; then
-			remoteIndicator="\\[${green}\\]${gitAheadSymbol}\\[${reset}\\]";
+			remoteIndicator="${prompt_np_start}${green}${prompt_np_end}${gitAheadSymbol}${prompt_np_start}${reset}${prompt_np_end}";
 		elif [ "$behind" -gt 0 ]; then
-			remoteIndicator="\\[${red}\\]${gitBehindSymbol}\\[${reset}\\]";
+			remoteIndicator="${prompt_np_start}${red}${prompt_np_end}${gitBehindSymbol}${prompt_np_start}${reset}${prompt_np_end}";
 		fi;
 	fi;
 
-	printf "\\[%b\\]%s %s\\[%b\\]" "${cyan}" "${gitBranchLabel}" "${branchDisplay}" "${reset}";
+	printf '%s%s %s%s' "${prompt_np_start}${cyan}${prompt_np_end}" "${gitBranchLabel}" "${branchDisplay}" "${prompt_np_start}${reset}${prompt_np_end}";
 	printf " %s" "$changeIndicator";
 	if [ -n "$remoteIndicator" ]; then
 		printf " %s" "$remoteIndicator";
@@ -124,9 +128,9 @@ prompt_git_info() {
 }
 # Set the terminal title and prompt.
 PS1="";
-PS1+="\$(prompt_git_info)";
-PS1+="\$(prompt_path)";
-PS1+="\$(prompt_prev) ";
+PS1+='$(__prompt_git_info)';
+PS1+='$(__prompt_path)';
+PS1+='$(__prompt_prev) ';
 PS1+="\[$yellow\]>\[$reset\] ";
 export PS1;
 

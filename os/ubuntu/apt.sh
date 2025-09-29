@@ -3,6 +3,14 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
+# Ensure the base system sources list matches the expected defaults.
+DEFAULT_SOURCES_FILE="${PWD}/sources.list.default"
+if [[ -f ${DEFAULT_SOURCES_FILE} ]]; then
+    if ! sudo cmp -s "${DEFAULT_SOURCES_FILE}" /etc/apt/sources.list 2>/dev/null; then
+        sudo tee /etc/apt/sources.list >/dev/null <"${DEFAULT_SOURCES_FILE}"
+    fi
+fi
+
 download_key() {
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL "$PROTON_KEY_URL"

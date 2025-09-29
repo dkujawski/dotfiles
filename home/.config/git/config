@@ -93,11 +93,11 @@
     # Use the email address associated with the GitHub account.
     email = "dave.kujawski@gmail.com"
     name = "Dave Kujawski"
-    signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFB6qhxeOmP2mlNBfFbm7yY4M52YBPej8UKScudKezfR
+    signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA3nAgkxIvejGu2Io+RoPiABSbuiauKR6b1q6k7/mkny dave@leo 
 
 [gpg]
     format = ssh
 
 [gpg "ssh"]
-    program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+    program = "/opt/1Password/op-ssh-sign"
     allowedSignersFile = ~/.config/git/allowed_signers 

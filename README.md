@@ -1,112 +1,172 @@
-# Mathias’s dotfiles
+# Dave's dotfiles
 
-![Screenshot of my shell prompt](https://i.imgur.com/EkEtphC.png)
+Personal dotfiles configuration with secure 1Password integration for shell environments.
+
+## Features
+
+- **Secure Secret Management**: Shell-based 1Password integration following official best practices
+- **No Compiled Dependencies**: Pure shell scripts for maximum portability and auditability
+- **Performance Optimized**: Caching with TTL to minimize 1Password API calls
+- **Cross-Platform**: Works on macOS and Linux
+- **Modular Design**: Easy to customize and extend
 
 ## Installation
 
-**Warning:** If you want to give these dotfiles a try, you should first fork this repository, review the code, and remove things you don’t want or need. Don’t blindly use my settings unless you know what that entails. Use at your own risk!
+**Warning:** If you want to give these dotfiles a try, you should first fork this repository, review the code, and remove things you don't want or need. Don't blindly use my settings unless you know what that entails. Use at your own risk!
 
-### Using Git and the bootstrap script
+### Prerequisites
 
-You can clone the repository wherever you want. (I like to keep it in `~/Projects/dotfiles`, with `~/dotfiles` as a symlink.) The bootstrapper script will pull in the latest version and copy the files to your home folder.
+1. **1Password CLI**: Install from [1Password Developer Documentation](https://developer.1password.com/docs/cli/get-started/)
+2. **Authentication**: Either sign in with `op signin` or set up a service account token
 
-```bash
-git clone https://github.com/mathiasbynens/dotfiles.git && cd dotfiles && source bootstrap.sh
-```
-
-To update, `cd` into your local `dotfiles` repository and then:
+### Quick Install
 
 ```bash
-source bootstrap.sh
+git clone https://github.com/dkujawski/dotfiles.git && cd dotfiles && make
 ```
 
-Alternatively, to update while avoiding the confirmation prompt:
+### Manual Installation Steps
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/dkujawski/dotfiles.git
+   cd dotfiles
+   ```
+
+2. **Install dotfiles and tools:**
+
+   ```bash
+   make install-dotfiles
+   ```
+
+3. **Install Homebrew packages (optional):**
+
+   ```bash
+   make install-brew
+   ```
+
+## 1Password Secret Management
+
+This dotfiles configuration includes secure integration with 1Password for managing environment secrets.
+
+### Authentication Options
+
+#### Option 1: Service Account (Recommended for Automation)
 
 ```bash
-set -- -f; source bootstrap.sh
+export OP_SERVICE_ACCOUNT_TOKEN='your-service-account-token'
 ```
 
-### Git-free install
-
-To install these dotfiles without Git:
+#### Option 2: User Session (Interactive)
 
 ```bash
-cd; curl -#L https://github.com/mathiasbynens/dotfiles/tarball/main | tar -xzv --strip-components 1 --exclude={README.md,bootstrap.sh,.osx,LICENSE-MIT.txt}
+op signin
 ```
 
-To update later on, just run that command again.
+### Configured Secrets
 
-### Specify the `$PATH`
+The following environment variables are automatically loaded from 1Password:
 
-If `~/.path` exists, it will be sourced along with the other files, before any feature testing (such as [detecting which version of `ls` is being used](https://github.com/mathiasbynens/dotfiles/blob/aff769fd75225d8f2e481185a71d5e05b76002dc/.aliases#L21-L26)) takes place.
+- `GITHUB_TOKEN` - GitHub personal access token
+- `CONFLUENCE_USER` - Confluence username  
+- `CONFLUENCE_API_TOKEN` - Confluence API token
+- `ATLASSIAN_TOKEN` / `JIRA_API_TOKEN` - Atlassian API token
+- `ARTIFACTORY_TOKEN` - Artifactory access token
 
-Here’s an example `~/.path` file that adds `/usr/local/bin` to the `$PATH`:
+### Customizing Secret References
+
+Edit `tools/load-secrets-secure.sh` to modify the 1Password secret references:
 
 ```bash
-export PATH="/usr/local/bin:$PATH"
+# In the create_env_file() function
+GITHUB_TOKEN=op://Private/github-token/credential
+CUSTOM_SECRET=op://YourVault/YourItem/YourField
 ```
 
-### Add custom commands without creating a new fork
+### Security Features
 
-If `~/.extra` exists, it will be sourced along with the other files. You can use this to add a few custom commands without the need to fork this entire repository, or to add commands you don’t want to commit to a public repository.
+- **No Plaintext Exposure**: Uses 1Password's `op run` command when possible
+- **Secure Caching**: Encrypted cache with 30-minute TTL
+- **Minimal Permissions**: Cache files have restricted permissions (0600)
+- **Timeout Protection**: 30-second timeout prevents hanging
 
-My `~/.extra` looks something like this:
+## Available Make Targets
 
 ```bash
-# Git credentials
-# Not in the repository, to prevent people from accidentally committing under my name
-GIT_AUTHOR_NAME="Mathias Bynens"
-GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
-git config --global user.name "$GIT_AUTHOR_NAME"
-GIT_AUTHOR_EMAIL="mathias@mailinator.com"
-GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
-git config --global user.email "$GIT_AUTHOR_EMAIL"
+make                    # Install dotfiles and Homebrew (default)
+make install-dotfiles   # Install dotfiles to home directory  
+make install-brew       # Install Homebrew if not present
+make deploy-load-secrets # Deploy the shell-based load-secrets tool
+make check              # Check for differences between source and destination
+make check-extra        # Check for extra files in target
+make clean              # Clean up temporary files
+make help               # Show all available targets
 ```
 
-You could also use `~/.extra` to override settings, functions and aliases from my dotfiles repository. It’s probably better to [fork this repository](https://github.com/mathiasbynens/dotfiles/fork) instead, though.
+## Customization
 
-### Sensible macOS defaults
+### Add Custom Commands
 
-When setting up a new Mac, you may want to set some sensible macOS defaults:
+If `~/.extra` exists, it will be sourced along with the other files. You can use this to add custom commands without forking this repository.
+
+### Specify Custom `$PATH`
+
+If `~/.path` exists, it will be sourced to modify your PATH before other configurations load.
+
+## Troubleshooting
+
+### 1Password Authentication Issues
+
+**Problem**: "Not authenticated with 1Password" error
+**Solution**:
 
 ```bash
-./.macos
+# For user accounts
+op signin
+
+# For service accounts  
+export OP_SERVICE_ACCOUNT_TOKEN='your-token'
 ```
 
-### Install Homebrew formulae
-
-When setting up a new Mac, you may want to install some common [Homebrew](https://brew.sh/) formulae (after installing Homebrew, of course):
+**Problem**: Secrets loading times out
+**Solution**: Check your 1Password CLI installation and network connectivity:
 
 ```bash
-./brew.sh
+op --version
+op whoami
 ```
 
-Some of the functionality of these dotfiles depends on formulae installed by `brew.sh`. If you don’t plan to run `brew.sh`, you should look carefully through the script and manually install any particularly important ones. A good example is Bash/Git completion: the dotfiles use a special version from Homebrew.
+### Cache Issues
 
-## Feedback
+**Problem**: Stale secrets being loaded
+**Solution**: Clear the cache:
 
-Suggestions/improvements
-[welcome](https://github.com/mathiasbynens/dotfiles/issues)!
+```bash
+rm -rf ~/.cache/op-secrets-secure
+```
 
-## Author
+### Debug Mode
 
-| [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](http://twitter.com/mathias "Follow @mathias on Twitter") |
-|---|
-| [Mathias Bynens](https://mathiasbynens.be/) |
+Enable debug logging to troubleshoot issues:
 
-## Thanks to…
+```bash
+export DEBUG=1
+source ~/.bash_profile
+```
 
-* @ptb and [his _macOS Setup_ repository](https://github.com/ptb/mac-setup)
-* [Ben Alman](http://benalman.com/) and his [dotfiles repository](https://github.com/cowboy/dotfiles)
-* [Cătălin Mariș](https://github.com/alrra) and his [dotfiles repository](https://github.com/alrra/dotfiles)
-* [Gianni Chiappetta](https://butt.zone/) for sharing his [amazing collection of dotfiles](https://github.com/gf3/dotfiles)
-* [Jan Moesen](http://jan.moesen.nu/) and his [ancient `.bash_profile`](https://gist.github.com/1156154) + [shiny _tilde_ repository](https://github.com/janmoesen/tilde)
-* Lauri ‘Lri’ Ranta for sharing [loads of hidden preferences](https://web.archive.org/web/20161104144204/http://osxnotes.net/defaults.html)
-* [Matijs Brinkhuis](https://matijs.brinkhu.is/) and his [dotfiles repository](https://github.com/matijs/dotfiles)
-* [Nicolas Gallagher](http://nicolasgallagher.com/) and his [dotfiles repository](https://github.com/necolas/dotfiles)
-* [Sindre Sorhus](https://sindresorhus.com/)
-* [Tom Ryder](https://sanctum.geek.nz/) and his [dotfiles repository](https://sanctum.geek.nz/cgit/dotfiles.git/about)
-* [Kevin Suttle](http://kevinsuttle.com/) and his [dotfiles repository](https://github.com/kevinSuttle/dotfiles) and [macOS-Defaults project](https://github.com/kevinSuttle/macOS-Defaults), which aims to provide better documentation for [`~/.macos`](https://mths.be/macos)
-* [Haralan Dobrev](https://hkdobrev.com/)
-* Anyone who [contributed a patch](https://github.com/mathiasbynens/dotfiles/contributors) or [made a helpful suggestion](https://github.com/mathiasbynens/dotfiles/issues)
-# Test commit signing
+## Security Considerations
+
+- **Service Account Tokens**: Store securely and rotate regularly
+- **Cache Location**: `~/.cache/op-secrets-secure` with restricted permissions
+- **Cache TTL**: 30 minutes by default, configurable in the script
+- **Network**: Requires internet connectivity to 1Password servers
+- **Audit**: All 1Password access is logged in your 1Password account
+
+## License
+
+MIT License - see [LICENSE-MIT.txt](LICENSE-MIT.txt)
+
+## Acknowledgments
+
+Based on the excellent dotfiles foundation by [Mathias Bynens](https://github.com/mathiasbynens/dotfiles) and the community.

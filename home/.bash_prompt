@@ -45,8 +45,8 @@ else
 fi;
 
 # Printable prompt markers
-readonly prompt_np_start=$'\001'
-readonly prompt_np_end=$'\002'
+prompt_np_start=$'\001'
+prompt_np_end=$'\002'
 
 # Git prompt symbols (ASCII for broad compatibility)
 gitBranchLabel='git:'

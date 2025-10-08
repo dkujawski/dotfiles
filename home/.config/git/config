@@ -88,6 +88,7 @@
 
 [init]
     defaultBranch = main
+    templatedir = ~/.git_template
 
 [user]
     # Use the email address associated with the GitHub account.

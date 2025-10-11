@@ -214,6 +214,9 @@ async fn main() -> Result<()> {
                 item if item.contains("Artifactory") => {
                     secrets.insert("ARTIFACTORY_TOKEN", value);
                 }
+                item if item.contains("tf_cloud_javisrike/credential") => {
+                    secrets.insert("TF_TOKEN_app_terraform_io", value);
+                }
                 _ => {}
             }
         }

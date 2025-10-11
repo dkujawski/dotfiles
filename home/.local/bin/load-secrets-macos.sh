@@ -130,6 +130,7 @@ CONFLUENCE_API_TOKEN=op://Private/confluence-token/credential
 ATLASSIAN_TOKEN=op://Private/ATLASSIAN_API_TOKEN/credential
 JIRA_API_TOKEN=op://Private/ATLASSIAN_API_TOKEN/credential
 ARTIFACTORY_TOKEN=op://Private/Artifactory DPE/credential
+TF_TOKEN_app_terraform_io=op://Private/tf_cloud_javisrike/credential
 EOF
 }
 
@@ -151,7 +152,7 @@ load_secrets_with_op_run() {
     local output
     output=$(op run --env-file="$temp_env_file" -- bash -c '
         # Export all variables that were injected by op run
-        env | grep -E "^(GITHUB_TOKEN|CONFLUENCE_USER|CONFLUENCE_API_TOKEN|ATLASSIAN_TOKEN|JIRA_API_TOKEN|ARTIFACTORY_TOKEN)=" | while IFS= read -r line; do
+        env | grep -E "^(GITHUB_TOKEN|CONFLUENCE_USER|CONFLUENCE_API_TOKEN|ATLASSIAN_TOKEN|JIRA_API_TOKEN|ARTIFACTORY_TOKEN|TF_TOKEN_app_terraform_io)=" | while IFS= read -r line; do
             echo "export $line"
         done
     ' 2>/dev/null)
@@ -180,6 +181,7 @@ load_secrets_direct() {
         ["CONFLUENCE_API_TOKEN"]="op://Private/confluence-token/credential"
         ["ATLASSIAN_TOKEN"]="op://Private/ATLASSIAN_API_TOKEN/credential"
         ["ARTIFACTORY_TOKEN"]="op://Private/Artifactory DPE/credential"
+        ["TF_TOKEN_app_terraform_io"]="op://Private/tf_cloud_javisrike/credential"
     )
     
     local success_count=0

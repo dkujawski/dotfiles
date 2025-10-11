@@ -118,6 +118,7 @@ load_secrets_direct() {
         ["CONFLUENCE_API_TOKEN"]="op://Private/confluence-token/credential"
         ["ATLASSIAN_TOKEN"]="op://Private/ATLASSIAN_API_TOKEN/credential"
         ["ARTIFACTORY_TOKEN"]="op://Employee/Artifactory DPE/credential"
+        ["TF_TOKEN_app_terraform_io"]="op://Private/tf_cloud_javisrike/credential"
     )
     
     local success_count=0

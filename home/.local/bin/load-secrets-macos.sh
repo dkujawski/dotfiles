@@ -4,6 +4,15 @@
 
 set -euo pipefail
 
+# Load centralized secrets configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "${SCRIPT_DIR}/secrets-config.sh" ]; then
+    source "${SCRIPT_DIR}/secrets-config.sh"
+else
+    echo "Error: secrets-config.sh not found" >&2
+    exit 1
+fi
+
 # Configuration
 CACHE_DIR="${HOME}/.cache/op-secrets-macos"
 CACHE_TTL_MINUTES=60  # Longer TTL for individual accounts
@@ -99,31 +108,13 @@ ensure_authenticated() {
     
     # Check if we're in an interactive terminal
     if [ -t 0 ] && [ -t 1 ] && [ -t 2 ]; then
-        debug_log "Interactive terminal detected, attempting signin to both accounts"
-        
-        # Try foxcorporation.1password.com first
+        debug_log "Interactive terminal detected, attempting signin to foxcorporation.1password.com"
         if op signin --account foxcorporation.1password.com >/dev/null 2>&1; then
             debug_log "Successfully signed in to foxcorporation.1password.com"
             update_session_cache
+            return 0
         else
             debug_log "Signin to foxcorporation.1password.com failed or was cancelled"
-        fi
-        
-        # Try my.1password.com
-        if op signin --account my.1password.com >/dev/null 2>&1; then
-            debug_log "Successfully signed in to my.1password.com"
-            update_session_cache
-            return 0
-        else
-            debug_log "Signin to my.1password.com failed or was cancelled"
-        fi
-        
-        # If we got here, at least one signin should have succeeded
-        if op whoami >/dev/null 2>&1; then
-            debug_log "At least one account is authenticated"
-            return 0
-        else
-            debug_log "No accounts were successfully authenticated"
             return 1
         fi
     else
@@ -132,24 +123,7 @@ ensure_authenticated() {
     fi
 }
 
-# Create environment file with secret references
-create_env_file() {
-    local env_file="$1"
-    debug_log "Creating environment file: $env_file"
-    
-    cat > "$env_file" << 'EOF'
-# 1Password Secret References for Individual Account
-# Using Private vault (available in individual accounts)
-
-GITHUB_TOKEN=op://Private/github-token/credential
-CONFLUENCE_USER=op://Private/confluence-token/username
-CONFLUENCE_API_TOKEN=op://Private/confluence-token/credential
-ATLASSIAN_TOKEN=op://Private/ATLASSIAN_API_TOKEN/credential
-JIRA_API_TOKEN=op://Private/ATLASSIAN_API_TOKEN/credential
-ARTIFACTORY_TOKEN=op://Private/Artifactory DPE/credential
-TF_TOKEN_app_terraform_io=op://Private/tf_cloud_javisrike/credential
-EOF
-}
+# Note: create_env_file function is now provided by secrets-config.sh
 
 # Load secrets using op run (preferred method)
 load_secrets_with_op_run() {
@@ -198,14 +172,11 @@ load_secrets_with_op_run() {
 load_secrets_direct() {
     debug_log "Loading secrets using direct op read (fallback method)"
     
-    declare -A secrets=(
-        ["GITHUB_TOKEN"]="op://Private/github-token/credential"
-        ["CONFLUENCE_USER"]="op://Private/confluence-token/username"
-        ["CONFLUENCE_API_TOKEN"]="op://Private/confluence-token/credential"
-        ["ATLASSIAN_TOKEN"]="op://Private/ATLASSIAN_API_TOKEN/credential"
-        ["ARTIFACTORY_TOKEN"]="op://Private/Artifactory DPE/credential"
-        ["TF_TOKEN_app_terraform_io"]="op://Private/tf_cloud_javisrike/credential"
-    )
+    # Use centralized secrets configuration
+    declare -A secrets
+    while IFS= read -r secret_name; do
+        secrets["$secret_name"]=$(get_secret_reference "$secret_name")
+    done < <(get_secret_names)
     
     local success_count=0
     local total_count=${#secrets[@]}

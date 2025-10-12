@@ -266,15 +266,15 @@ Debug output includes:
 
 ## Migration Guide
 
-### From Compiled Implementations
+### Shell-Only Implementation
 
-The shell-based approach replaces previous Rust and Go implementations:
+The system uses only shell script implementations for maximum compatibility and ease of maintenance:
 
-**Removed:**
+**Current Implementation:**
 
-- `tools/load-secrets/` (Rust implementation)
-- `tools/load-secrets-go/` (Go implementation)
-- Compilation dependencies and build processes
+- Pure shell script approach using bash
+- No compilation dependencies or build processes required
+- Works across all Unix-like systems (macOS, Linux)
 - Complex caching with encryption
 
 **Added:**

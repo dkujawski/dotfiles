@@ -1,7 +1,4 @@
-# Cargo build artifacts
-/tools/load-secrets/target/
-**/*.rs.bk
-Cargo.lock
+# Build artifacts (if any)
 
 # macOS system files
 .DS_Store

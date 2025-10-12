@@ -47,6 +47,11 @@ attempt_load_secrets() {
                 debug_log "Skipping concealed value: $line"
             elif [[ $line == export* ]]; then
                 # Handle export commands
+                if [ "$DEBUG" = "1" ] || [ "$DEBUG" = "true" ]; then
+                    # Extract variable name for debug logging
+                    var_name=$(echo "$line" | sed 's/^export \([^=]*\)=.*/\1/')
+                    debug_log "Processing environment variable: $var_name"
+                fi
                 eval "$line"
             fi
         done <<< "$secrets_output"

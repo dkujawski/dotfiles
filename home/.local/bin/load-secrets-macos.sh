@@ -182,6 +182,12 @@ load_secrets_with_op_run() {
     
     # Only output if we have valid (non-concealed) secrets
     if [ -n "$output" ]; then
+        # Extract and log environment variable names being populated
+        if [ "${DEBUG:-0}" = "1" ] || [ "${DEBUG:-0}" = "true" ]; then
+            echo "$output" | grep "^export " | sed 's/^export \([^=]*\)=.*/\1/' | while IFS= read -r var_name; do
+                debug_log "Populating environment variable: $var_name"
+            done
+        fi
         echo "$output"
     else
         return 1
@@ -216,11 +222,13 @@ load_secrets_direct() {
             fi
             
             echo "export $var_name='$value'"
+            debug_log "Populating environment variable: $var_name"
             success_count=$((success_count + 1))
             
             # Also export JIRA_API_TOKEN as alias for ATLASSIAN_TOKEN
             if [ "$var_name" = "ATLASSIAN_TOKEN" ]; then
                 echo "export JIRA_API_TOKEN='$value'"
+                debug_log "Populating environment variable: JIRA_API_TOKEN"
             fi
         else
             debug_log "Failed to read $secret_ref"

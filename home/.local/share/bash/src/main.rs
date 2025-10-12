@@ -268,6 +268,9 @@ async fn main() -> Result<()> {
 
     // Output the secrets as shell export commands
     for (key, value) in secrets {
+        if debug {
+            eprintln!("[DEBUG] Populating environment variable: {}", key);
+        }
         println!("export {}='{}'", key, value);
     }
 

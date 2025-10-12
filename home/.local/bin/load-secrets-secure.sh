@@ -41,11 +41,34 @@ check_auth() {
         return 0
     else
         debug_log "No valid 1Password session found"
-        # Don't attempt interactive signin in non-interactive contexts
+        # Attempt interactive signin to both accounts
         if [ -t 0 ] && [ -t 1 ] && [ -t 2 ]; then
-            debug_log "Interactive terminal detected, could attempt signin"
-            # For now, just return error to avoid hanging
-            return 1
+            debug_log "Interactive terminal detected, attempting signin to both accounts"
+            
+            # Try foxcorporation.1password.com first
+            if op signin --account foxcorporation.1password.com >/dev/null 2>&1; then
+                debug_log "Successfully signed in to foxcorporation.1password.com"
+                return 0
+            else
+                debug_log "Signin to foxcorporation.1password.com failed or was cancelled"
+            fi
+            
+            # Try my.1password.com
+            if op signin --account my.1password.com >/dev/null 2>&1; then
+                debug_log "Successfully signed in to my.1password.com"
+                return 0
+            else
+                debug_log "Signin to my.1password.com failed or was cancelled"
+            fi
+            
+            # Check if at least one account is now authenticated
+            if op whoami >/dev/null 2>&1; then
+                debug_log "At least one account is now authenticated"
+                return 0
+            else
+                debug_log "No accounts were successfully authenticated"
+                return 1
+            fi
         else
             debug_log "Non-interactive context, skipping signin attempt"
             return 1

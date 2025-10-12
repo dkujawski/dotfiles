@@ -1,4 +1,4 @@
-.PHONY: all install-dotfiles install-brew clean check check-extra deploy-load-secrets
+.PHONY: all install-dotfiles install-brew clean check check-extra deploy-load-secrets clear-secrets-cache
 
 # Default target
 all: install-dotfiles install-brew 
@@ -73,6 +73,19 @@ clean:
 	@rm -f home/.local/bin/load-secrets-secure.sh
 	@rm -f home/.local/bin/load-secrets-macos.sh
 
+# Clear 1Password secrets caches
+clear-secrets-cache:
+	@echo "Clearing 1Password secrets caches..."
+	@if [ -d "$(HOME)/.cache/op-secrets-secure" ]; then \
+		echo "  Removing op-secrets-secure cache..."; \
+		rm -rf "$(HOME)/.cache/op-secrets-secure"; \
+	fi
+	@if [ -d "$(HOME)/.cache/op-secrets-macos" ]; then \
+		echo "  Removing op-secrets-macos cache..."; \
+		rm -rf "$(HOME)/.cache/op-secrets-macos"; \
+	fi
+	@echo "Secrets caches cleared successfully."
+
 # Force installation without confirmation
 force: install-dotfiles install-brew
 
@@ -85,5 +98,6 @@ help:
 	@echo "  check          - Check for differences between source and destination files"
 	@echo "  check-extra    - Check for extra files in target that don't exist in source"
 	@echo "  clean          - Clean up temporary files"
+	@echo "  clear-secrets-cache - Clear 1Password secrets caches"
 	@echo "  force          - Force installation without confirmation"
 	@echo "  deploy-load-secrets - Deploy the shell-based load-secrets tool" 

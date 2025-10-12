@@ -139,26 +139,70 @@ async fn main() -> Result<()> {
         eprintln!("[DEBUG] Starting 1Password secrets loading");
     }
 
-    // Set up 1Password account
+    // Set up 1Password account (default to foxcorporation)
     env::set_var("OP_ACCOUNT", "foxcorporation.1password.com");
     if debug {
         eprintln!("[DEBUG] Using 1Password account: {}", env::var("OP_ACCOUNT").unwrap());
     }
 
-    // Sign in to 1Password
-    let signin_output = AsyncCommand::new("op")
+    // Sign in to both 1Password accounts
+    let mut fox_success = false;
+    let mut my_success = false;
+
+    // Try foxcorporation.1password.com first
+    if debug {
+        eprintln!("[DEBUG] Attempting signin to foxcorporation.1password.com");
+    }
+    let fox_signin_output = AsyncCommand::new("op")
         .arg("signin")
+        .arg("--account")
+        .arg("foxcorporation.1password.com")
         .output()
         .await
-        .context("Failed to execute op signin")?;
+        .context("Failed to execute op signin for foxcorporation account")?;
 
-    if !signin_output.status.success() {
-        eprintln!("Failed to sign in to 1Password");
+    if fox_signin_output.status.success() {
+        fox_success = true;
+        if debug {
+            eprintln!("[DEBUG] Successfully signed in to foxcorporation.1password.com");
+        }
+    } else {
+        if debug {
+            eprintln!("[DEBUG] Signin to foxcorporation.1password.com failed or was cancelled");
+        }
+    }
+
+    // Try my.1password.com
+    if debug {
+        eprintln!("[DEBUG] Attempting signin to my.1password.com");
+    }
+    let my_signin_output = AsyncCommand::new("op")
+        .arg("signin")
+        .arg("--account")
+        .arg("my.1password.com")
+        .output()
+        .await
+        .context("Failed to execute op signin for my.1password.com account")?;
+
+    if my_signin_output.status.success() {
+        my_success = true;
+        if debug {
+            eprintln!("[DEBUG] Successfully signed in to my.1password.com");
+        }
+    } else {
+        if debug {
+            eprintln!("[DEBUG] Signin to my.1password.com failed or was cancelled");
+        }
+    }
+
+    // Check if at least one account was successfully signed in
+    if !fox_success && !my_success {
+        eprintln!("Failed to sign in to any 1Password account");
         std::process::exit(1);
     }
 
     if debug {
-        eprintln!("[DEBUG] 1Password signin completed");
+        eprintln!("[DEBUG] At least one 1Password account signin completed");
     }
 
     // Set email

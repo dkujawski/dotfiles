@@ -99,14 +99,31 @@ ensure_authenticated() {
     
     # Check if we're in an interactive terminal
     if [ -t 0 ] && [ -t 1 ] && [ -t 2 ]; then
-        debug_log "Interactive terminal detected, attempting signin"
-        # Use op signin with account hint to reduce prompts
+        debug_log "Interactive terminal detected, attempting signin to both accounts"
+        
+        # Try foxcorporation.1password.com first
         if op signin --account foxcorporation.1password.com >/dev/null 2>&1; then
-            debug_log "Successfully signed in"
+            debug_log "Successfully signed in to foxcorporation.1password.com"
+            update_session_cache
+        else
+            debug_log "Signin to foxcorporation.1password.com failed or was cancelled"
+        fi
+        
+        # Try my.1password.com
+        if op signin --account my.1password.com >/dev/null 2>&1; then
+            debug_log "Successfully signed in to my.1password.com"
             update_session_cache
             return 0
         else
-            debug_log "Signin failed or was cancelled"
+            debug_log "Signin to my.1password.com failed or was cancelled"
+        fi
+        
+        # If we got here, at least one signin should have succeeded
+        if op whoami >/dev/null 2>&1; then
+            debug_log "At least one account is authenticated"
+            return 0
+        else
+            debug_log "No accounts were successfully authenticated"
             return 1
         fi
     else

@@ -91,7 +91,21 @@ force: install-dotfiles install-brew
 
 # Help target
 help:
+	@echo "======================================"
+	@echo "Dotfiles Deployment Quickstart"
+	@echo "======================================"
+	@echo ""
+	@echo "First-time setup or full deployment:"
+	@echo "  1. make check          # Preview what will change"
+	@echo "  2. make all            # Install dotfiles + Homebrew"
+	@echo ""
+	@echo "Update existing dotfiles only:"
+	@echo "  1. make check          # Preview changes"
+	@echo "  2. make install-dotfiles"
+	@echo ""
+	@echo "======================================"
 	@echo "Available targets:"
+	@echo "======================================"
 	@echo "  all            - Install dotfiles and Homebrew (default)"
 	@echo "  install-dotfiles - Install dotfiles to home directory"
 	@echo "  install-brew   - Install Homebrew if not present"

@@ -128,6 +128,7 @@ __prompt_git_info() {
 }
 # Set the terminal title and prompt.
 PS1="";
+PS1+='$(__set_iterm_tab_title)';
 PS1+='$(__prompt_git_info)';
 PS1+='$(__prompt_path)';
 PS1+='$(__prompt_prev) ';

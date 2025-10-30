@@ -93,7 +93,7 @@
     # Use the email address associated with the GitHub account.
     email = "dave.kujawski@gmail.com"
     name = "Dave Kujawski"
-    signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA3nAgkxIvejGu2Io+RoPiABSbuiauKR6b1q6k7/mkny dave@leo 
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA3nAgkxIvejGu2Io+RoPiABSbuiauKR6b1q6k7/mkny
 
 [gpg]
     format = ssh

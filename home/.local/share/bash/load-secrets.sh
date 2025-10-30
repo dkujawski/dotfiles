@@ -34,7 +34,7 @@ if [[ -z ${SSH_AUTH_SOCK:-} || ! -S $SSH_AUTH_SOCK ]]; then
 fi
 
 secret_specs=(
-  "op://Private/github-token/credential|GITHUB_TOKEN"
+  "op://Private/github-personal-dev/token|GITHUB_TOKEN"
   "op://Private/confluence-token/username|CONFLUENCE_USER"
   "op://Private/confluence-token/credential|CONFLUENCE_API_TOKEN"
   "op://Private/ATLASSIAN_API_TOKEN/credential|ATLASSIAN_TOKEN,JIRA_API_TOKEN"

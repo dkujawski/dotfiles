@@ -1,5 +1,7 @@
 .PHONY: all install-dotfiles clean check check-extra install-packages force help
 
+SHELL := /bin/bash
+
 # Default target
 all: install-dotfiles
 

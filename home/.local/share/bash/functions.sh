@@ -169,3 +169,8 @@ function o() {
 function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
+
+# Load secrets from 1Password
+function load-secrets {
+    source "${HOME}/.local/share/bash/load-secrets.sh"
+}

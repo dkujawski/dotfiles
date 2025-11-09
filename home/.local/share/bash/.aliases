@@ -26,7 +26,7 @@ alias l="ls -lF ${colorflag}"
 alias la="ls -lAF ${colorflag}"
 alias lsd="ls -lF ${colorflag} | grep --color=never '^d'"
 alias ll="ls -lathr ${colorflag}"
-alias ls="command ls ${colorflag}"
+alias ls="\\ls ${colorflag}"
 
 # Always use color with grep family
 alias grep='grep --color=auto'

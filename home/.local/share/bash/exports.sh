@@ -17,7 +17,7 @@ export PYTHONIOENCODING='UTF-8';
 export HISTSIZE='32768';
 export HISTFILESIZE="${HISTSIZE}";
 # Omit duplicates and commands that begin with a space from history.
-export HISTCONTROL='ignoreboth';
+export HISTCONTROL=ignoreboth:erasedups;
 
 # Prefer US English and use UTF-8.
 export LANG='en_US.UTF-8';
@@ -26,19 +26,9 @@ export LC_ALL='en_US.UTF-8';
 # Highlight section titles in manual pages.
 export LESS_TERMCAP_md="${yellow}";
 
-# Don’t clear the screen after quitting a manual page.
-export MANPAGER='less -X';
-
-# Avoid issues with `gpg` as installed via Homebrew.
-# https://stackoverflow.com/a/42265848/96656
-export GPG_TTY=$(tty);
-
-# Hide the “default interactive shell is now zsh” warning on macOS.
-export BASH_SILENCE_DEPRECATION_WARNING=1;
-
-# Homebrew
-if command_exists brew; then
-    eval "$(brew shellenv)"
-elif [[ -f "/opt/homebrew/bin/brew" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+if command_exists bat; then
+    export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
 fi
+
+# Ensure gpg can talk to the current terminal.
+export GPG_TTY=$(tty);

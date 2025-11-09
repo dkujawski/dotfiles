@@ -271,9 +271,7 @@ au BufNewFile,BufFilePre,BufRead *.md set filetype=markdown
 " reStructuredText
 "
 
-
 syntax on
-e
 
 " Enhance command-line completion
 set wildmenu

@@ -11,35 +11,41 @@ source "${HOME}/.local/share/bash/utility-functions.sh"
 # Standard Paths
 # --------------------------------------------------------------------------------------
 
-# Homebrew
-if command_exists brew; then
-    eval "$(brew shellenv)"
-elif [[ -f "/opt/homebrew/bin/brew" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+# Local user bins
+path_prepend "${HOME}/.local/bin"
+path_prepend "${HOME}/bin"
+
+
+# Cargo
+if [[ -d "${HOME}/.cargo/bin" ]]; then
+    path_prepend "${HOME}/.cargo/bin"
 fi
 
 
-# Visual Studio Code (code)
-path_append "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+# Poetry
+if [[ -d "${HOME}/.poetry/bin" ]]; then
+    path_prepend "${HOME}/.poetry/bin"
+fi
 
 
 # pyenv
 if [[ -d "${HOME}/.pyenv" ]]; then
     export PYENV_ROOT="${HOME}/.pyenv"
-    path_append "${PYENV_ROOT}/bin"
+    path_append "${PYENV_ROOT}/shims"
 fi
 
 
-# Go
-if command_exists go && [[ -d "${HOME}/.go" ]]; then
-    export GOPATH="${HOME}/.go"
-    [[ -d "${GOPATH}/bin" ]] && export GOBIN="${HOME}/.go/bin"
-    path_prepend "${GOBIN}"
+# Go workspace
+if [[ -d "${HOME}/go/bin" ]]; then
+    export GOPATH="${HOME}/go"
+    path_prepend "${GOPATH}/bin"
 fi
 
 
-# Local user bin
-path_prepend "${HOME}/.local/bin"
+# Snap binaries
+if [[ -d "/snap/bin" ]]; then
+    path_append "/snap/bin"
+fi
 
 
 export PATH

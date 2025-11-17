@@ -23,4 +23,4 @@ else
     echo "Error: Could not determine home directory."
     exit 1
 fi
-./os/ubuntu/apt.sh
+./os/arch/pacman.sh

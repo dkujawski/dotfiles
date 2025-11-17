@@ -1,0 +1,32 @@
+# Core development tooling
+base-devel
+git
+curl
+wget
+rsync
+tmux
+htop
+tree
+
+# Shell quality-of-life
+bat
+fd
+ripgrep
+
+# Languages and runtimes
+go
+nodejs
+npm
+python
+python-pip
+
+# Applications and services
+docker
+docker-compose
+gnome-shell-extensions
+jq
+yq
+sqlite
+terraform
+vlc
+vim

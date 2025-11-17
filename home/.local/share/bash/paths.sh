@@ -47,5 +47,10 @@ if [[ -d "/snap/bin" ]]; then
     path_append "/snap/bin"
 fi
 
+# Android Studio
+if [[ -d "/opt/android-studio/bin" ]]; then
+    path_append "/opt/android-studio/bin"
+fi
+
 
 export PATH

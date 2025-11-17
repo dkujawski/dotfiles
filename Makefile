@@ -12,8 +12,8 @@ install-dotfiles:
 	@mkdir -p ~/.local/bin
 
 install-packages:
-	@echo "Installing Ubuntu packages..."
-	@bash os/ubuntu/apt.sh
+	@echo "Installing Arch Linux packages..."
+	@bash os/arch/pacman.sh
 
 # Check for differences between source and destination
 check:
@@ -67,7 +67,7 @@ help:
 	@echo "Available targets:"
 	@echo "  all              - Install dotfiles (default)"
 	@echo "  install-dotfiles - Install dotfiles to home directory"
-	@echo "  install-packages - Install Ubuntu packages defined in os/ubuntu"
+	@echo "  install-packages - Install Arch packages defined in os/arch"
 	@echo "  check            - Check for differences between source and destination files"
 	@echo "  check-extra      - Check for extra files in target that don't exist in source"
 	@echo "  clean            - Clean up temporary files"

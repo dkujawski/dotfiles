@@ -1,10 +1,10 @@
-# Ubuntu dotfiles
+# Arch Linux dotfiles
 
-These dotfiles manage my interactive shell configuration on Ubuntu desktops. The branch is Ubuntu-only; all previous macOS-specific logic has been removed.
+These dotfiles manage my interactive shell configuration on Arch Linux desktops. The branch is Arch-only; all previous macOS-specific logic has been removed.
 
 ## Installation
 
-Clone the repository and run the bootstrap script. The script copies configuration files into your home directory via the `Makefile` and then runs the Ubuntu package bootstrap:
+Clone the repository and run the bootstrap script. The script copies configuration files into your home directory via the `Makefile` and then runs the Arch package bootstrap:
 
 ```bash
 git clone https://github.com/dkujawski/dotfiles.git
@@ -23,7 +23,7 @@ set -- -f; source bootstrap.sh
 The `Makefile` exposes a few helpers that are safe to run directly:
 
 - `make install-dotfiles` – sync the contents of `home/` into `$HOME`
-- `make install-packages` – install the apt repositories and packages defined in `os/ubuntu`
+- `make install-packages` – install the pacman packages defined in `os/arch`
 - `make check` – preview the rsync changes without modifying your home directory
 - `make clean` – remove build artefacts produced by the secrets tooling
 

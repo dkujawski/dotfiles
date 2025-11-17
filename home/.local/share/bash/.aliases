@@ -38,7 +38,11 @@ alias sudo='sudo '
 
 # System helpers
 alias week='date +%V'
-alias update='sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y && sudo apt autoclean'
+if command -v pacman >/dev/null 2>&1; then
+    alias update='sudo pacman -Syu'
+elif command -v apt >/dev/null 2>&1; then
+    alias update='sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y && sudo apt autoclean'
+fi
 alias localip="hostname -I | awk '{print \$1}'"
 alias ips='ip -brief addr show'
 alias flush='sudo resolvectl flush-caches'
@@ -63,6 +67,9 @@ alias afk='loginctl lock-session'
 
 # Miscellaneous
 command -v hd >/dev/null || alias hd='hexdump -C'
+if command -v nvim >/dev/null 2>&1; then
+    alias vim='nvim'
+fi
 alias map='xargs -n1'
 alias reload="exec ${SHELL} -l"
 alias path='echo -e ${PATH//:/\\n}'

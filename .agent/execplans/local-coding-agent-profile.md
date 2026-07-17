@@ -18,7 +18,7 @@ loadable human profile. Resolve secrets only through 1Password and use its SSH a
 - [x] Add failing profile, secret, and SSH tests.
 - [x] Implement the agent/human profile split and 1Password helpers.
 - [x] Implement dependency and deployment orchestration.
-- [ ] Update specifications, operational documentation, changelog, and PR record.
+- [x] Update specifications, operational documentation, changelog, and PR record.
 - [ ] Deploy locally and verify a clean, accurately deployed branch.
 
 ## Decisions

@@ -1,9 +1,27 @@
 #!/usr/bin/env bash
 cd "$(dirname "${BASH_SOURCE}")";
+pwd;
+echo "Installing dotfiles...";
+
+function install_home() {
+	rsync -avhc --no-perms home/ ~/
+}
+
+function source_now() {
+	source ~/.bash_profile;
+}
+
+function install_brew() {
+    [ -d /opt/homebrew/bin ] && export PATH=$PATH:/opt/homebrew/bin
+    if ! command -v brew 2>&1 >/dev/null; then
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+}
 
 function do_it() {
-	rsync -avh --no-perms ./home ~;
-	source ~/.bash_profile;
+	install_home;
+  install_brew;
+	# source_now;
 }
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then
@@ -17,22 +35,5 @@ else
 fi;
 
 unset do_it;
-
-https://stackoverflow.com/a/394247/3406946
-platform='unknown'
-unamestr=$(uname)
-if [[ "$unamestr" == 'Linux' ]]; then
-   platform='linux'
-elif [[ "$unamestr" == 'Darwin' ]]; then
-   platform='darwin'
-elif [[ "$unamestr" == 'FreeBSD' ]]; then
-   platform='freebsd'
-fi
-
-if [[ "$unamestr" == 'Linux' ]]; then
-	./os/ubuntu/apt.sh
-elif [[ "$platform" == "darwin" ]]; then
-   cp os/macos/.macos ~/
-   source ~/.macos
-   ./os/macos/brew.sh
-fi
+unset install_home;
+unset source_now;

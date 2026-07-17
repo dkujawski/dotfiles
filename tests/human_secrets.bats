@@ -83,3 +83,22 @@ EOF
   [ "$status" -ne 0 ]
   [[ "$output" == *"1Password CLI 'op' is required"* ]]
 }
+
+@test "load-human-secrets rejects invalid mappings before reading them" {
+  cat >"${TEST_HOME}/invalid.env" <<'EOF'
+lowercase_name=op://Employee/example/credential
+EOF
+  cat >"${MOCK_BIN}/op" <<'EOF'
+#!/usr/bin/env bash
+exit 98
+EOF
+  chmod +x "${MOCK_BIN}/op"
+
+  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+    DOTFILES_HUMAN_SECRETS_FILE="${TEST_HOME}/invalid.env" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; load-human-secrets'
+
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"invalid 1Password mapping for lowercase_name"* ]]
+}

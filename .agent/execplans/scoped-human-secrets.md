@@ -15,8 +15,8 @@ scripts and on-disk plaintext caches during deployment.
 - [x] Add failing regression tests for startup, helper scope, explicit loading, and cleanup.
 - [x] Replace the eager human loader with opt-in helpers.
 - [x] Remove legacy cache-producing scripts and deploy-time artifacts.
-- [ ] Update the specification, documentation, changelog, and PR record.
-- [ ] Run the complete deterministic validation suite and commit passing milestones.
+- [x] Update the specification, documentation, changelog, and PR record.
+- [x] Run the complete deterministic validation suite and commit passing milestones.
 
 ## Decisions
 
@@ -41,3 +41,11 @@ the full Bats, ShellCheck, syntax, and existing authentication suites through `m
 The removed cache files intentionally have no repository-managed recovery path. Secrets
 remain available from 1Password. Revert the branch to restore loader code, though doing so
 is not recommended because it would reintroduce plaintext caching.
+
+## Outcomes
+
+Human shells now start without invoking 1Password and expose scoped and explicit-import
+helpers backed only by versioned `op://` references. Both deployment profiles remove the
+known plaintext caches and obsolete loader scripts. The full deterministic suite passes,
+including helper scope, missing-tool, invalid-mapping, cleanup, dry-run, ShellCheck, syntax,
+and authentication behavior.

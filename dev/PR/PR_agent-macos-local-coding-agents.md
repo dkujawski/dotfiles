@@ -12,7 +12,9 @@
 - `make agent-check`
 - `brew bundle check --file Brewfile.agent`
 - Fresh noninteractive Bash startup with no unsolicited output or 1Password lookup
-- Local deployment and `make agent-doctor` (to be recorded after deployment)
+- Local deployment is idempotent and `make agent-doctor` passes
+- Scoped 1Password injection succeeds from a clean environment
+- The selected 1Password SSH-agent socket exposes an authorized key
 
 ## Deployment and rollback
 

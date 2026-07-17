@@ -52,3 +52,10 @@ teardown() {
   [ -f "${TEST_HOME}/.bash_prompt" ]
   grep -Fq 'DOTFILES_PROFILE:-agent' "${TEST_HOME}/.bash_profile"
 }
+
+@test "agent doctor gives an actionable error for an undeployed profile" {
+  run env HOME="${TEST_HOME}" PATH="${PATH}" "${REPO_ROOT}/tools/agent-doctor.sh"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"agent profile is missing; run 'make agent-deploy'"* ]]
+}

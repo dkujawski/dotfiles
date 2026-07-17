@@ -19,7 +19,7 @@ loadable human profile. Resolve secrets only through 1Password and use its SSH a
 - [x] Implement the agent/human profile split and 1Password helpers.
 - [x] Implement dependency and deployment orchestration.
 - [x] Update specifications, operational documentation, changelog, and PR record.
-- [ ] Deploy locally and verify a clean, accurately deployed branch.
+- [x] Deploy locally and verify a clean, accurately deployed branch.
 
 ## Decisions
 
@@ -51,4 +51,8 @@ merge commit, and the original deployment branches remain unchanged.
 
 ## Outcomes
 
-To be completed after local deployment and validation.
+The coding-agent profile is deployed and is the quiet default. Targeted deployment is
+idempotent, generated Git configuration remains untouched, the human profile can be loaded
+in place, scoped 1Password injection resolves from a clean environment, and the 1Password
+SSH agent exposes an authorized key. Backups from the migration are stored under
+`~/.local/state/dotfiles/backups/20260717T181826Z-79462`.

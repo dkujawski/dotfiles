@@ -38,8 +38,12 @@ fi
 if command -v op >/dev/null 2>&1; then
     if op whoami >/dev/null 2>&1; then
         pass '1Password CLI authentication is available'
+    elif [[ -r "${TARGET_HOME}/.config/dotfiles/secrets/agent.env" ]] && \
+        op run --env-file="${TARGET_HOME}/.config/dotfiles/secrets/agent.env" -- \
+            sh -c 'test -n "${GITHUB_TOKEN:-}"' >/dev/null 2>&1; then
+        pass '1Password scoped secret injection is available'
     else
-        warn "1Password CLI is not authenticated; enable desktop integration or run 'op signin'"
+        warn "1Password secret injection is unavailable; enable desktop integration or run 'op signin'"
     fi
 fi
 

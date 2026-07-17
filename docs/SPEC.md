@@ -20,6 +20,17 @@
 - Homebrew and `~/.local/bin` are added without deleting or duplicating caller PATH entries.
 - Optional tool initialization is conditional and failures include an actionable remedy.
 
+## Human interactive performance
+
+- Opening a human shell must not resolve secrets or eagerly initialize NVM, pyenv, or the
+  global Bash completion framework. Secrets stay behind `load-secrets`; NVM and completion
+  initialize on first use; pyenv is available through its bin and shims directories.
+- Startup modules are sourced directly without background spinner processes, and Homebrew
+  paths are derived without invoking `brew` during startup.
+- A prompt render in a Git worktree uses no more than two Git commands while preserving the
+  branch, dirty state, upstream divergence, repository-relative path, terminal title, and
+  previous command status. A prompt outside Git uses no more than one Git command.
+
 ## Credentials
 
 - Versioned files may contain variable names and `op://` references, never secret values.

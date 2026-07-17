@@ -4,19 +4,20 @@
 # shellcheck source=/dev/null
 
 
-source "${HOME}/.local/share/bash/utility-functions.sh"
+if ! type path_append >/dev/null 2>&1; then
+    source "${HOME}/.local/share/bash/utility-functions.sh"
+fi
 
 
 # --------------------------------------------------------------------------------------
 # Standard Paths
 # --------------------------------------------------------------------------------------
 
-# Homebrew
-if command_exists brew; then
-    eval "$(brew shellenv)"
-elif [[ -f "/opt/homebrew/bin/brew" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
+# Homebrew's stable macOS paths do not require running `brew shellenv` in every shell.
+homebrew_prefix="${HOMEBREW_PREFIX:-/opt/homebrew}"
+path_append "${homebrew_prefix}/bin"
+path_append "${homebrew_prefix}/sbin"
+unset homebrew_prefix
 
 
 # Visual Studio Code (code)

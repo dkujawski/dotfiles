@@ -18,16 +18,16 @@ fi
 
 # shellcheck disable=SC1091
 source "${CONF}/utility-functions.sh"
-source_with_spinner "${CONF}/paths.sh" "Loading paths configuration..."
-source_with_spinner "${CONF}/exports.sh" "Loading environment exports..."
-source_with_spinner "${CONF}/load-secrets.sh" "Loading secret helpers..."
-source_with_spinner "${CONF}/aliases.sh" "Loading aliases..."
-source_with_spinner "${CONF}/functions.sh" "Loading functions..."
-source_with_spinner "${CONF}/git-functions.sh" "Loading git functions..."
+source "${CONF}/paths.sh"
+source "${CONF}/exports.sh"
+source "${CONF}/load-secrets.sh"
+source "${CONF}/aliases.sh"
+source "${CONF}/functions.sh"
+source "${CONF}/git-functions.sh"
 unset CONF
 
-source_with_spinner "${HOME}/.bash_prompt" "Loading bash prompt..."
-[[ -r "${HOME}/.cargo/env" ]] && source_with_spinner "${HOME}/.cargo/env" "Loading cargo environment..."
+source "${HOME}/.bash_prompt"
+[[ -r "${HOME}/.cargo/env" ]] && source "${HOME}/.cargo/env"
 
 shopt -s nocaseglob histappend cdspell
 for option in autocd globstar; do
@@ -37,32 +37,37 @@ if [[ -t 0 ]]; then
     stty -ixon 2>/dev/null || true
 fi
 
-if command -v brew >/dev/null 2>&1; then
-    brew_prefix="$(brew --prefix)"
-    if [[ -r "${brew_prefix}/etc/profile.d/bash_completion.sh" ]]; then
-        export BASH_COMPLETION_COMPAT_DIR="${brew_prefix}/etc/bash_completion.d"
-        # shellcheck disable=SC1090
-        source "${brew_prefix}/etc/profile.d/bash_completion.sh"
-    fi
-    unset brew_prefix
-fi
-
-if type _git >/dev/null 2>&1; then
-    complete -o default -o nospace -F _git g
-fi
-if [[ -e "${HOME}/.ssh/config" ]]; then
-    complete -o default -o nospace -W "$(awk '/^Host / && $2 !~ /[?*]/ {for (i=2;i<=NF;i++) print $i}' "${HOME}/.ssh/config")" scp sftp ssh
-fi
 complete -W "NSGlobalDomain" defaults
 complete -o nospace -W "Contacts Calendar Dock Finder Mail Safari SystemUIServer Terminal iTerm" killall
 
 export NVM_DIR="${HOME}/.nvm"
-[[ -s "${NVM_DIR}/nvm.sh" ]] && source "${NVM_DIR}/nvm.sh"
-[[ -s "${NVM_DIR}/bash_completion" ]] && source "${NVM_DIR}/bash_completion"
+if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
+    _dotfiles_load_nvm() {
+        unset -f nvm node npm npx _dotfiles_load_nvm
+        # shellcheck disable=SC1090
+        source "${NVM_DIR}/nvm.sh"
+        [[ -s "${NVM_DIR}/bash_completion" ]] && source "${NVM_DIR}/bash_completion"
+    }
+    nvm() { _dotfiles_load_nvm && nvm "$@"; }
+    node() { _dotfiles_load_nvm && command node "$@"; }
+    npm() { _dotfiles_load_nvm && command npm "$@"; }
+    npx() { _dotfiles_load_nvm && command npx "$@"; }
+fi
+
+DOTFILES_BASH_COMPLETION_FILE="${HOMEBREW_PREFIX:-/opt/homebrew}/etc/profile.d/bash_completion.sh"
+if [[ -r "${DOTFILES_BASH_COMPLETION_FILE}" ]]; then
+    _dotfiles_load_completion() {
+        local command_name="${1:-}"
+        complete -r -D 2>/dev/null || true
+        # shellcheck disable=SC1090
+        source "${DOTFILES_BASH_COMPLETION_FILE}"
+        type _git >/dev/null 2>&1 && complete -o default -o nospace -F _git g
+        type _completion_loader >/dev/null 2>&1 && _completion_loader "${command_name}"
+    }
+    complete -D -F _dotfiles_load_completion 2>/dev/null || true
+fi
 
 export PYENV_ROOT="${HOME}/.pyenv"
-if [[ -d "${PYENV_ROOT}/bin" ]]; then
-    PATH="${PYENV_ROOT}/bin:${PATH}"
-    export PATH
-    command -v pyenv >/dev/null 2>&1 && eval "$(pyenv init - bash)"
-fi
+path_prepend "${PYENV_ROOT}/shims"
+path_prepend "${PYENV_ROOT}/bin"
+export PATH

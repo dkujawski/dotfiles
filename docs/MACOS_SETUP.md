@@ -37,6 +37,11 @@ The next ordinary shell still defaults to the agent profile. Human startup defin
 Agent and human deployment remove obsolete secret loader scripts and the known legacy
 plaintext cache directories. Those caches are intentionally not copied into the backup.
 
+Human shells defer optional work: NVM loads on the first `nvm`, `node`, `npm`, or `npx`
+command, and the global completion framework loads on the first completion request. pyenv's
+bin and shims are placed on `PATH` without running `pyenv init`. Run `load-secrets` explicitly
+only when legacy human-shell credentials are required.
+
 ## Validation
 
 `make agent-doctor` checks the operating system, required commands, deployed profile,

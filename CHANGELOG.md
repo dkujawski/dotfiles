@@ -20,6 +20,10 @@
 - Agent and human profiles now share one secret mapping source and validation/loading
   implementation while retaining their profile-specific commands.
 - Bash profile guards are process-local so nested shells initialize the selected profile.
+- Human interactive startup now defers secrets, NVM, and Bash completion, avoids redundant
+  Homebrew and spinner subprocesses, and exposes pyenv through `PATH` without eager init.
+- Git prompt rendering now preserves command status while collecting branch, worktree,
+  upstream, path, and iTerm title state with at most two Git commands per refresh.
 
 ### Security
 

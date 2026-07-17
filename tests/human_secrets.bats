@@ -97,6 +97,7 @@ EOF
 
 @test "human secret helper reports a missing op command" {
   run -127 env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+    HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; with-human-secrets -- true'
 

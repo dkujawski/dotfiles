@@ -50,13 +50,15 @@ clean:
 
 test:
 	@bats tests
-	@shellcheck --severity=warning home/.bash_profile home/.bashrc \
+	@shellcheck --severity=warning home/.bash_profile home/.bash_prompt home/.bashrc \
 		home/.config/dotfiles/lib/secrets.bash \
-		home/.config/dotfiles/profiles/*.bash home/.local/share/bash/load-secrets.sh \
+		home/.config/dotfiles/profiles/*.bash home/.local/share/bash/exports.sh \
+		home/.local/share/bash/load-secrets.sh home/.local/share/bash/paths.sh \
 		tools/deploy-agent.sh tools/agent-doctor.sh
-	@bash -n home/.bash_profile home/.bashrc home/.config/dotfiles/lib/secrets.bash \
-		home/.config/dotfiles/profiles/*.bash \
-		home/.local/share/bash/load-secrets.sh tools/deploy-agent.sh tools/agent-doctor.sh \
+	@bash -n home/.bash_profile home/.bash_prompt home/.bashrc \
+		home/.config/dotfiles/lib/secrets.bash home/.config/dotfiles/profiles/*.bash \
+		home/.local/share/bash/exports.sh home/.local/share/bash/load-secrets.sh \
+		home/.local/share/bash/paths.sh tools/deploy-agent.sh tools/agent-doctor.sh \
 		bootstrap.sh
 	@./test-auth.sh
 

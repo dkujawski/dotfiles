@@ -24,6 +24,7 @@ export LANG='en_US.UTF-8';
 export LC_ALL='en_US.UTF-8';
 
 # Highlight section titles in manual pages.
+# shellcheck disable=SC2154  # Defined by utility-functions.sh before this module loads.
 export LESS_TERMCAP_md="${yellow}";
 
 export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
@@ -31,14 +32,8 @@ export MANPAGER="sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p
 
 # Avoid issues with `gpg` as installed via Homebrew.
 # https://stackoverflow.com/a/42265848/96656
-export GPG_TTY=$(tty);
+GPG_TTY="$(tty)";
+export GPG_TTY
 
 # Hide the “default interactive shell is now zsh” warning on macOS.
 export BASH_SILENCE_DEPRECATION_WARNING=1;
-
-# Homebrew
-if command_exists brew; then
-    eval "$(brew shellenv)"
-elif [[ -f "/opt/homebrew/bin/brew" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-fi

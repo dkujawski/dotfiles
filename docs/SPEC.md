@@ -4,6 +4,8 @@
 
 - Homebrew Bash is the supported macOS login shell.
 - `.bash_profile` and `.bashrc` dispatch to `agent` unless `DOTFILES_PROFILE=human`.
+- Profile-loaded guards are local to one Bash process; nested shells must run their own
+  profile initialization even when the parent shell has already loaded it.
 - Agent startup must be silent, deterministic, offline, noninteractive, and safe without
   optional tools, a TTY, 1Password authentication, or an SSH-agent socket.
 - `load-human-profile` sources human settings into the current shell; `human-shell` starts

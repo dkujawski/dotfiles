@@ -15,6 +15,7 @@
 - Default Make workflow now installs and deploys the coding-agent profile.
 - Home deployment is targeted and no longer overwrites generated Git configuration.
 - Live iTerm preferences are synchronized with the current laptop deployment.
+- Bash profile guards are process-local so nested shells initialize the selected profile.
 
 ### Security
 

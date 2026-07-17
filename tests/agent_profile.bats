@@ -5,9 +5,11 @@ setup() {
   REPO_ROOT="$(cd "${BATS_TEST_DIRNAME}/.." && pwd)"
   TEST_HOME="$(mktemp -d "${BATS_TEST_TMPDIR}/home.XXXXXX")"
   MOCK_BIN="$(mktemp -d "${BATS_TEST_TMPDIR}/bin.XXXXXX")"
-  export REPO_ROOT TEST_HOME MOCK_BIN
+  DOTFILES_CONFIG_DIR="${TEST_HOME}/.config/dotfiles"
+  export REPO_ROOT TEST_HOME MOCK_BIN DOTFILES_CONFIG_DIR
   mkdir -p "${TEST_HOME}/.config/dotfiles/profiles" "${TEST_HOME}/.config/dotfiles/secrets"
   cp "${REPO_ROOT}/home/.bash_profile" "${TEST_HOME}/.bash_profile"
+  cp "${REPO_ROOT}/home/.bashrc" "${TEST_HOME}/.bashrc"
   if [[ -d "${REPO_ROOT}/home/.config/dotfiles" ]]; then
     cp -R "${REPO_ROOT}/home/.config/dotfiles/." "${TEST_HOME}/.config/dotfiles/"
   fi
@@ -46,6 +48,24 @@ EOF
   [[ "$output" == *"with-agent-secrets is a function"* ]]
   [[ "$output" == *"load-agent-secrets is a function"* ]]
   [[ "$output" != *"alias ls="* ]]
+}
+
+@test "nested shell reloads the agent profile instead of inheriting its guard" {
+  run env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; PAGER=less; bash --noprofile --norc -c '\''source "$HOME/.bash_profile"; printf "%s|%s" "$DOTFILES_PROFILE" "$PAGER"'\'''
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "agent|cat" ]
+}
+
+@test "nested shell reloads the agent profile through bashrc" {
+  run env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; PAGER=less; bash --noprofile --norc -c '\''source "$HOME/.bashrc"; printf "%s|%s" "$DOTFILES_PROFILE" "$PAGER"'\'''
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "agent|cat" ]
 }
 
 @test "with-agent-secrets scopes op references to one command" {

@@ -1,9 +1,11 @@
 # shellcheck shell=bash
 
-if [[ "${DOTFILES_AGENT_PROFILE_LOADED:-0}" == 1 ]]; then
+if [[ "${DOTFILES_AGENT_PROFILE_LOADED:-}" == "$$" ]]; then
     return 0 2>/dev/null || exit 0
 fi
-export DOTFILES_AGENT_PROFILE_LOADED=1
+# An inherited guard belongs to the parent shell and must not suppress startup here.
+DOTFILES_AGENT_PROFILE_LOADED="$$"
+export -n DOTFILES_AGENT_PROFILE_LOADED
 export DOTFILES_PROFILE=agent
 
 _dotfiles_path_prepend() {

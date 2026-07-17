@@ -40,4 +40,6 @@ case "${DOTFILES_PROFILE}" in
         ;;
 esac
 
-export DOTFILES_PROFILE_LOADED=1
+# Keep the guard local to this Bash process so nested shells initialize themselves.
+DOTFILES_PROFILE_LOADED="$$"
+export -n DOTFILES_PROFILE_LOADED

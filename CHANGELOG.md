@@ -17,6 +17,7 @@
 - Live iTerm preferences are synchronized with the current laptop deployment.
 - Human shell startup now defines scoped and explicit-import secret helpers instead of
   resolving all credentials eagerly.
+- Bash profile guards are process-local so nested shells initialize the selected profile.
 
 ### Security
 

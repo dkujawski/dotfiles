@@ -170,11 +170,6 @@ function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
 
-# Load secrets from 1Password
-function load-secrets {
-    source "${HOME}/.local/share/bash/load-secrets.sh"
-}
-
 # Set iTerm tab title based on current directory and git repository
 function __set_iterm_tab_title() {
     # Only proceed if we're in iTerm

@@ -81,6 +81,27 @@ install_tree() {
     done < <(find "${source_dir}" -type f -print0 | sort -z)
 }
 
+remove_legacy_secret_artifacts() {
+    local relative_path target_path
+    local legacy_paths=(
+        '.cache/op-secrets-secure'
+        '.cache/op-secrets-macos'
+        '.local/bin/load-secrets-secure.sh'
+        '.local/bin/load-secrets-macos.sh'
+        '.local/bin/secrets-config.sh'
+    )
+    for relative_path in "${legacy_paths[@]}"; do
+        target_path="${TARGET_HOME}/${relative_path}"
+        [[ -e "${target_path}" || -L "${target_path}" ]] || continue
+        if [[ "${DRY_RUN}" == 1 ]]; then
+            printf 'Would remove legacy secret artifact %s\n' "${target_path}"
+        else
+            rm -rf -- "${target_path}"
+            printf 'Removed legacy secret artifact %s\n' "${target_path}"
+        fi
+    done
+}
+
 ensure_ssh_include() {
     local ssh_dir="${TARGET_HOME}/.ssh" ssh_config="${TARGET_HOME}/.ssh/config"
     local include_line='Include ~/.ssh/config.d/*' temp_file
@@ -112,6 +133,7 @@ install_file '.bashrc'
 install_tree '.config/dotfiles'
 install_file '.ssh/config.d/1password.conf' 600
 ensure_ssh_include
+remove_legacy_secret_artifacts
 
 if [[ "${PROFILE}" == human ]]; then
     install_file '.bash_prompt'

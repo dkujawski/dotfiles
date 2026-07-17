@@ -20,7 +20,7 @@ fi
 source "${CONF}/utility-functions.sh"
 source_with_spinner "${CONF}/paths.sh" "Loading paths configuration..."
 source_with_spinner "${CONF}/exports.sh" "Loading environment exports..."
-source_with_spinner "${CONF}/load-secrets.sh" "Loading secrets..."
+source_with_spinner "${CONF}/load-secrets.sh" "Loading secret helpers..."
 source_with_spinner "${CONF}/aliases.sh" "Loading aliases..."
 source_with_spinner "${CONF}/functions.sh" "Loading functions..."
 source_with_spinner "${CONF}/git-functions.sh" "Loading git functions..."

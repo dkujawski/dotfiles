@@ -53,6 +53,36 @@ teardown() {
   grep -Fq 'DOTFILES_PROFILE:-agent' "${TEST_HOME}/.bash_profile"
 }
 
+@test "deployment removes legacy plaintext secret caches and loaders" {
+  mkdir -p "${TEST_HOME}/.cache/op-secrets-secure" \
+    "${TEST_HOME}/.cache/op-secrets-macos" "${TEST_HOME}/.local/bin"
+  printf 'export TOKEN=plaintext\n' >"${TEST_HOME}/.cache/op-secrets-secure/secrets.cache"
+  printf 'export TOKEN=plaintext\n' >"${TEST_HOME}/.cache/op-secrets-macos/secrets.cache"
+  touch "${TEST_HOME}/.local/bin/load-secrets-secure.sh" \
+    "${TEST_HOME}/.local/bin/load-secrets-macos.sh" \
+    "${TEST_HOME}/.local/bin/secrets-config.sh"
+
+  run "${REPO_ROOT}/tools/deploy-agent.sh" --home "${TEST_HOME}"
+
+  [ "$status" -eq 0 ]
+  [ ! -e "${TEST_HOME}/.cache/op-secrets-secure" ]
+  [ ! -e "${TEST_HOME}/.cache/op-secrets-macos" ]
+  [ ! -e "${TEST_HOME}/.local/bin/load-secrets-secure.sh" ]
+  [ ! -e "${TEST_HOME}/.local/bin/load-secrets-macos.sh" ]
+  [ ! -e "${TEST_HOME}/.local/bin/secrets-config.sh" ]
+}
+
+@test "deployment dry-run preserves legacy secret artifacts" {
+  mkdir -p "${TEST_HOME}/.cache/op-secrets-secure"
+  printf 'export TOKEN=plaintext\n' >"${TEST_HOME}/.cache/op-secrets-secure/secrets.cache"
+
+  run "${REPO_ROOT}/tools/deploy-agent.sh" --dry-run --home "${TEST_HOME}"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"Would remove legacy secret artifact"* ]]
+  [ -f "${TEST_HOME}/.cache/op-secrets-secure/secrets.cache" ]
+}
+
 @test "agent doctor gives an actionable error for an undeployed profile" {
   run env HOME="${TEST_HOME}" PATH="${PATH}" "${REPO_ROOT}/tools/agent-doctor.sh"
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 setup() {
+  bats_require_minimum_version 1.5.0
   REPO_ROOT="$(cd "${BATS_TEST_DIRNAME}/.." && pwd)"
   TEST_HOME="$(mktemp -d "${BATS_TEST_TMPDIR}/home.XXXXXX")"
   MOCK_BIN="$(mktemp -d "${BATS_TEST_TMPDIR}/bin.XXXXXX")"
@@ -85,7 +86,7 @@ EOF
 }
 
 @test "secret helper fails with an actionable error when op is unavailable" {
-  run env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
+  run -127 env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; with-agent-secrets -- true'
 

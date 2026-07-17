@@ -17,7 +17,7 @@ loadable human profile. Resolve secrets only through 1Password and use its SSH a
 - [x] Commit the live iTerm preference state without importing generated `~/.gitconfig` drift.
 - [x] Add failing profile, secret, and SSH tests.
 - [x] Implement the agent/human profile split and 1Password helpers.
-- [ ] Implement dependency and deployment orchestration.
+- [x] Implement dependency and deployment orchestration.
 - [ ] Update specifications, operational documentation, changelog, and PR record.
 - [ ] Deploy locally and verify a clean, accurately deployed branch.
 

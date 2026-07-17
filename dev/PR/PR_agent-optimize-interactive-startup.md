@@ -8,7 +8,7 @@
 
 ## Validation
 
-- `make test` (15 tests, ShellCheck, syntax checks, and authentication no-hang test)
+- `make test` (25 tests, ShellCheck, syntax checks, and authentication no-hang test)
 - `shellcheck --severity=warning` on all changed shell and Bats files
 - `git diff --check`
 - 25 prompt renders in this worktree: 3.55 seconds before, 1.21 seconds after

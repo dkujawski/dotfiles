@@ -51,9 +51,11 @@ clean:
 test:
 	@bats tests
 	@shellcheck --severity=warning home/.bash_profile home/.bashrc \
-		home/.config/dotfiles/profiles/*.bash tools/deploy-agent.sh tools/agent-doctor.sh
+		home/.config/dotfiles/profiles/*.bash home/.local/share/bash/load-secrets.sh \
+		tools/deploy-agent.sh tools/agent-doctor.sh
 	@bash -n home/.bash_profile home/.bashrc home/.config/dotfiles/profiles/*.bash \
-		tools/deploy-agent.sh tools/agent-doctor.sh bootstrap.sh
+		home/.local/share/bash/load-secrets.sh tools/deploy-agent.sh tools/agent-doctor.sh \
+		bootstrap.sh
 	@./test-auth.sh
 
 help:

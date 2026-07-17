@@ -35,21 +35,23 @@ human-shell
 ```
 
 `DOTFILES_PROFILE=human bash -l` is also supported. Run `make human-deploy` on a clean
-machine to install the legacy prompt, aliases, functions, and optional interactive secret
-loader without changing the default profile.
+machine to install the legacy prompt, aliases, functions, and opt-in secret helpers without
+changing the default profile. Human startup does not resolve or export credentials.
 
 ## Secrets and SSH
 
-Agent startup never exports secrets. Use the scoped form whenever possible:
+Shell startup never exports secrets. Use a profile-specific scoped form whenever possible:
 
 ```bash
 with-agent-secrets -- gh auth status
+with-human-secrets -- terraform plan
 ```
 
 When a tool requires variables in the existing shell, explicitly run:
 
 ```bash
 load-agent-secrets
+load-human-secrets
 ```
 
 Both commands read only the versioned `op://` references through the 1Password CLI.

@@ -54,8 +54,20 @@ file is installed or exported.
 Use `make agent-doctor` to verify socket presence. Manage key availability and application
 authorization in 1Password rather than copying keys into `~/.ssh`.
 
-## Legacy human profile
+## Human profile
 
-The human profile retains the previous interactive loader for compatibility. It is not
-loaded by coding agents. New automation should use the scoped agent helpers above; legacy
-plaintext caches can be removed with `make clear-secrets-cache`.
+The human profile also leaves credentials unresolved during startup. Prefer a scope around
+one child command:
+
+```bash
+with-human-secrets -- terraform plan
+```
+
+For a tool that cannot use the wrapper, `load-human-secrets` explicitly imports the
+allowlist into the current shell. The older `load-secrets` command remains an alias for this
+explicit operation; it is never called by profile startup.
+
+The loaders that wrote `~/.cache/op-secrets-secure` and `~/.cache/op-secrets-macos` have
+been removed. Either profile deployment deletes those legacy directories and installed
+loader scripts without backing up plaintext values. `make clear-secrets-cache` remains
+available for manual cleanup before deployment.

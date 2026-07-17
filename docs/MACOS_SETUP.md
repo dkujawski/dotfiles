@@ -31,7 +31,11 @@ existing SSH hosts or `~/.gitconfig`.
 
 Install the legacy modules on a clean machine with `make human-deploy`. Then use
 `load-human-profile` in an existing agent shell or `human-shell` for a fresh login shell.
-The next ordinary shell still defaults to the agent profile.
+The next ordinary shell still defaults to the agent profile. Human startup defines
+`with-human-secrets` and `load-human-secrets` but does not resolve credentials.
+
+Agent and human deployment remove obsolete secret loader scripts and the known legacy
+plaintext cache directories. Those caches are intentionally not copied into the backup.
 
 ## Validation
 

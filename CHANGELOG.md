@@ -15,8 +15,12 @@
 - Default Make workflow now installs and deploys the coding-agent profile.
 - Home deployment is targeted and no longer overwrites generated Git configuration.
 - Live iTerm preferences are synchronized with the current laptop deployment.
+- Human shell startup now defines scoped and explicit-import secret helpers instead of
+  resolving all credentials eagerly.
 
 ### Security
 
 - Coding-agent startup no longer exports cached plaintext secrets or attempts interactive
   authentication.
+- Removed cache-producing 1Password loaders; deployment now deletes their installed scripts
+  and legacy plaintext cache directories without retaining copies.

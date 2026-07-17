@@ -1,63 +1,43 @@
-https://stackoverflow.com/a/394247/3406946
-platform='unknown'
-unamestr=$(uname)
-if [[ "$unamestr" == 'Linux' ]]; then
-   platform='linux'
-elif [[ "$unamestr" == 'Darwin' ]]; then
-   platform='darwin'
-elif [[ "$unamestr" == 'FreeBSD' ]]; then
-   platform='freebsd'
-fi
+# shellcheck shell=bash
 
-source "${HOME}/.local/share/bash/utility-functions.sh"
-source_file "${HOME}/.local/share/bash/paths.sh"
+# Profile dispatcher. Coding agents are the default; humans opt in explicitly.
+export DOTFILES_CONFIG_DIR="${DOTFILES_CONFIG_DIR:-${HOME}/.config/dotfiles}"
+export DOTFILES_PROFILE="${DOTFILES_PROFILE:-agent}"
+export DOTFILES_HUMAN_PROFILE="${DOTFILES_HUMAN_PROFILE:-${DOTFILES_CONFIG_DIR}/profiles/human.bash}"
 
-# Load the shell dotfiles, and then some:
-# * ~/.path can be used to extend `$PATH`.
-# * ~/.extra can be used for other settings you don’t want to commit.
-for file in ~/.{path,bash_prompt,exports,aliases,functions,extra}; do
-	[ -r "$file" ] && [ -f "$file" ] && source "$file";
-done;
-unset file;
+load-human-profile() {
+    if [[ ! -r "${DOTFILES_HUMAN_PROFILE}" ]]; then
+        printf 'Error: human shell profile not found at %s. Run `make human-deploy`.\n' \
+            "${DOTFILES_HUMAN_PROFILE}" >&2
+        return 1
+    fi
+    export DOTFILES_PROFILE=human
+    # shellcheck disable=SC1090
+    source "${DOTFILES_HUMAN_PROFILE}"
+}
 
-# Case-insensitive globbing (used in pathname expansion)
-shopt -s nocaseglob;
+human-shell() {
+    local human_shell_path="${SHELL:-/opt/homebrew/bin/bash}"
+    if [[ ! -x "${human_shell_path}" ]]; then
+        printf 'Error: configured shell %s is not executable.\n' "${human_shell_path}" >&2
+        return 1
+    fi
+    DOTFILES_PROFILE=human "${human_shell_path}" -l
+}
 
-# Append to the Bash history file, rather than overwriting it
-shopt -s histappend;
+case "${DOTFILES_PROFILE}" in
+    agent)
+        # shellcheck disable=SC1090
+        source "${DOTFILES_CONFIG_DIR}/profiles/agent.bash"
+        ;;
+    human)
+        load-human-profile
+        ;;
+    *)
+        printf 'Error: unknown DOTFILES_PROFILE %q; expected agent or human.\n' \
+            "${DOTFILES_PROFILE}" >&2
+        return 2 2>/dev/null || exit 2
+        ;;
+esac
 
-# Autocorrect typos in path names when using `cd`
-shopt -s cdspell;
-
-# Enable some Bash 4 features when possible:
-# * `autocd`, e.g. `**/qux` will enter `./foo/bar/baz/qux`
-# * Recursive globbing, e.g. `echo **/*.txt`
-for option in autocd globstar; do
-	shopt -s "$option" 2> /dev/null;
-done;
-
-# Add tab completion for many Bash commands
-if which brew &> /dev/null && [ -r "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]; then
-	# Ensure existing Homebrew v1 completions continue to work
-	export BASH_COMPLETION_COMPAT_DIR="$(brew --prefix)/etc/bash_completion.d";
-	source "$(brew --prefix)/etc/profile.d/bash_completion.sh";
-elif [ -f /etc/bash_completion ]; then
-	source /etc/bash_completion;
-fi;
-
-# Enable tab completion for `g` by marking it as an alias for `git`
-if type _git &> /dev/null; then
-	complete -o default -o nospace -F _git g;
-fi;
-
-# Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
-[ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2- | tr ' ' '\n')" scp sftp ssh;
-
-if [[ "$platform" == "darwin" ]]; then
-	# Add tab completion for `defaults read|write NSGlobalDomain`
-	# You could just use `-g` instead, but I like being explicit
-	complete -W "NSGlobalDomain" defaults;
-
-	# Add `killall` tab completion for common apps
-	complete -o "nospace" -W "Contacts Calendar Dock Finder Mail Safari SystemUIServer Terminal iTerm" killall;
-fi
+export DOTFILES_PROFILE_LOADED=1

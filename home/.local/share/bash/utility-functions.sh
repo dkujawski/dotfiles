@@ -215,6 +215,9 @@ function command_exists {
 # --------------------------------------------------------------------------------------
 
 function source_file {
+  if command -v sha256sum >/dev/null 2>&1; then
+    [[ -r "${1}" ]] && run_with_spinner source "${1}"
+  fi
   [[ -r "${1}" ]] && source "${1}"
 }
 
@@ -267,6 +270,149 @@ function pkg_config_path_prepend {
 }
 
 # --------------------------------------------------------------------------------------
-# Relative Path Function
+# Progress Spinner
 # --------------------------------------------------------------------------------------
 
+# Run a command in the background and show the spinner
+run_with_spinner() {
+  tmp=$(echo -n "$@" | sha256sum | cut -d' ' -f1)
+  cmd="$1"
+  shift
+  ( $cmd "$@" & echo $! > $tmp )
+  until [[ -f $tmp ]]; do
+    sleep 0.1
+  done
+  local pid=$(cat $tmp)
+  rm $tmp
+  spinner $pid
+}
+
+random_char() {
+  local count=$1
+  local start=$2
+  local n=$((0 + $RANDOM % $count))
+  get_char $start $n
+}
+
+get_char() {
+  local start=$1
+  local pos=$2
+  local char=$(( $start + $pos ))
+  printf "\\u$(printf '%x' $char)"
+}
+
+random_spinner() {
+  local pid=$1
+
+  while ps -p $pid > /dev/null 2>&1; do
+    local spinstr=$(random_char 10 0xE38D)
+    printf "\b${spinstr}"
+    sleep 0.1
+  done
+  printf " \b\b"
+}
+
+clock_spinner() {
+  local pid=$1
+  local spinstr='🕛🕚🕙🕘🕗🕖🕕🕔'
+  spinner $pid "$spinstr"
+}
+
+star_spinner() {
+  local pid=$1
+  local spinstr='⭐🌟✨'
+  spinner $pid "$spinstr"
+}
+
+heart_spinner() {
+  local pid=$1
+  local spinstr='❤️💛💚💙💜'
+  spinner $pid "$spinstr"
+}
+
+circle_spinner() {
+  local pid=$1
+  local spinstr='◐◓◑◒'
+  spinner $pid "$spinstr"
+}
+
+line_spinner() {
+  local pid=$1
+  local spinstr='|/-\\'
+  spinner $pid "$spinstr"
+}
+
+arrow_spinner() {
+  local pid=$1
+  local spinstr='←↑→↓'
+  spinner $pid "$spinstr"
+}
+
+dot_spinner() {
+  local pid=$1
+  local spinstr='⠋⠙⠚⠒'
+  spinner $pid "$spinstr"
+}
+
+dot_spinner2() {
+  local pid=$1
+  local spinstr='⠁⠂⠄⠃'
+  spinner $pid "$spinstr"
+}
+
+moon_spinner() {
+  local pid=$1
+  local spinstr='🌑🌒🌓🌔🌕🌖🌗🌘'
+  spinner $pid "$spinstr"
+}
+
+spinner() {
+  local pid=$1
+  local spinstr=$2
+  if [[ -z $spinstr ]]; then
+    spinstr='⠋⠙⠚⠒'
+  fi
+  local i=0
+
+  while ps -p $pid > /dev/null 2>&1; do
+    printf "\b${spinstr:i++%${#spinstr}:1}"
+    sleep 0.1
+  done
+  printf " \b\b"
+}
+
+# --------------------------------------------------------------------------------------
+# Source with Spinner
+# --------------------------------------------------------------------------------------
+
+function source_with_spinner {
+  local file="$1"
+  local message="${2:-Sourcing ${file}...}"
+  
+  if [[ ! -r "$file" ]]; then
+    echo_error "Cannot read file: $file"
+    return 1
+  fi
+
+  # Start the spinner in the background
+  (
+    local spinstr='⠋⠙⠚⠒⠂⠂⠒⠲⠴⠦⠖⠒⠐⠐⠒⠓⠋'
+    local i=0
+    while true; do
+      printf "\r${blueb}${message}${end} ${spinstr:i++%${#spinstr}:1}"
+      sleep 0.1
+    done
+  ) & local spinner_pid=$!
+
+  # Source the file
+  source "$file"
+  local source_status=$?
+
+  # Kill the spinner
+  kill $spinner_pid 2>/dev/null
+  wait $spinner_pid 2>/dev/null
+  printf "\r\033[K" # Clear the line
+
+  # Return the status of the source command
+  return $source_status
+}

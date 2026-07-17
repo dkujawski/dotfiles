@@ -174,3 +174,32 @@ function tre() {
 function load-secrets {
     source "${HOME}/.local/share/bash/load-secrets.sh"
 }
+
+# Set iTerm tab title based on current directory and git repository
+function __set_iterm_tab_title() {
+    # Only proceed if we're in iTerm
+    if [[ "$TERM_PROGRAM" != "iTerm.app" ]]; then
+        return
+    fi
+    
+    local title=""
+    
+    # Check if we're inside a git repository
+    if git rev-parse --is-inside-work-tree &>/dev/null; then
+        # Get the git repository root directory
+        local git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+        if [[ -n "$git_root" ]]; then
+            # Extract repository name from the path
+            title=$(basename "$git_root")
+        fi
+    fi
+    
+    # Fall back to current directory name if not in git repo or git command failed
+    if [[ -z "$title" ]]; then
+        title=$(basename "$PWD")
+    fi
+    
+    # Set the iTerm tab title using escape sequence
+    # \033]0; sets both tab and window title, \007 terminates the sequence
+    printf '\033]0;%s\007' "$title"
+}

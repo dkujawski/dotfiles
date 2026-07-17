@@ -1,0 +1,33 @@
+# Build artifacts (if any)
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Local configuration files
+.env
+.env.local
+.env.*.local
+
+# Debug files
+*.debug
+*.profraw
+
+# Cache and encryption files
+.cache/
+**/.key
+*.enc

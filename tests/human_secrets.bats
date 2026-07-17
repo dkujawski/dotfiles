@@ -75,6 +75,26 @@ EOF
   [[ "$output" == *"value for op://Employee/github-token/credential" ]]
 }
 
+@test "human and agent profiles use the same secret mapping override" {
+  cat >"${TEST_HOME}/shared.env" <<'EOF'
+SHARED_TOKEN=op://Employee/shared-token/credential
+EOF
+  cat >"${MOCK_BIN}/op" <<'EOF'
+#!/usr/bin/env bash
+[[ "$1" == read ]] || exit 90
+printf 'value for %s' "$2"
+EOF
+  chmod +x "${MOCK_BIN}/op"
+
+  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+    DOTFILES_SECRETS_FILE="${TEST_HOME}/shared.env" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; load-human-secrets; printf "%s" "$SHARED_TOKEN"'
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"value for op://Employee/shared-token/credential" ]]
+}
+
 @test "human secret helper reports a missing op command" {
   run -127 env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     /opt/homebrew/bin/bash --noprofile --norc -c \

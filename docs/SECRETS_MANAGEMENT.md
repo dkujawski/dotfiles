@@ -7,6 +7,11 @@ environment names and `op://` references in
 `~/.config/dotfiles/secrets/agent.env`. Values are never committed, cached by this profile,
 printed by diagnostics, or passed through `eval`.
 
+Agent and human helpers share this mapping file through `DOTFILES_SECRETS_FILE`. Set that
+variable before profile startup to use another mapping file. The older
+`DOTFILES_HUMAN_SECRETS_FILE` override remains supported for human shells, but new
+configuration should use the shared variable.
+
 Prefer a credential scope around one command:
 
 ```bash

@@ -21,6 +21,8 @@
 ## Credentials
 
 - Versioned files may contain variable names and `op://` references, never secret values.
+- Both profiles must use the shared `DOTFILES_SECRETS_FILE` mapping source and shared
+  validation/loading implementation; profile-specific commands are compatibility wrappers.
 - Startup must not call `op`, load a secret cache, or export a credential.
 - `with-agent-secrets` scopes `op run` values to one child command.
 - `load-agent-secrets` reads only validated uppercase mappings and explicitly exports them

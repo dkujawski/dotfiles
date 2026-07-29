@@ -14,6 +14,8 @@
 
 - `make test` (32 Bats tests, ShellCheck, Bash syntax checks, and authentication no-hang test)
 - `git diff --check`
+- Live `make agent-deploy && make agent-doctor`
+- Live SSH authentication to `git@github.com`
 
 ## Deployment and rollback
 
@@ -27,6 +29,14 @@ To roll back the repository changes, revert the branch commits and run
 `make agent-deploy`. To restore HTTPS manually, run
 `gh config set git_protocol https --host github.com`; token rotation or replacement should
 be performed with `gh auth login` rather than placing credentials in shell startup files.
+
+## Current deployment note
+
+The local GitHub CLI now uses SSH and the 1Password SSH-agent handshake succeeds. Token
+synchronization is still blocked because the current 1Password PAT reports `repo` and
+`workflow` but lacks the required `read:org` scope (and does not report `gist`). The
+existing keyring OAuth token remains active until the 1Password credential is updated or
+explicitly replaced.
 
 ## Checklist
 

@@ -56,10 +56,10 @@ EOF
 @test "nested shell reloads the agent profile instead of inheriting its guard" {
   run env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
-    'source "$HOME/.bash_profile"; PAGER=less; bash --noprofile --norc -c '\''source "$HOME/.bash_profile"; printf "%s|%s" "$DOTFILES_PROFILE" "$PAGER"'\'''
+    'source "$HOME/.bash_profile"; PAGER=less; bash --noprofile --norc -c '\''source "$HOME/.bash_profile"; type _dotfiles_with_secrets >/dev/null; printf "%s|%s|helpers" "$DOTFILES_PROFILE" "$PAGER"'\'''
 
   [ "$status" -eq 0 ]
-  [ "$output" = "agent|cat" ]
+  [ "$output" = "agent|cat|helpers" ]
 }
 
 @test "nested shell reloads the agent profile through bashrc" {

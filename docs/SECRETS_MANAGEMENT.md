@@ -44,6 +44,24 @@ to these dotfiles.
 If `op` is missing, unauthenticated, or lacks vault access, helpers fail with a remediation
 message while ordinary shell startup continues normally.
 
+## GitHub CLI authentication
+
+Configure the persistent GitHub CLI authentication and Git transport explicitly:
+
+```bash
+make configure-gh
+```
+
+The command reads `op://Employee/github-token/credential`, passes it to `gh auth login`
+over standard input, and configures `github.com` Git operations for SSH. It removes
+`GH_TOKEN` and `GITHUB_TOKEN` only from its child `gh` commands so validation reads the
+operating-system credential store rather than an inherited environment override. Setup
+fails if the stored token does not exactly match the 1Password value or if `gh` does not
+report `git_protocol=ssh`. Neither token is printed.
+
+Use `tools/configure-gh.sh --dry-run` to preview the operation without reading 1Password or
+changing GitHub CLI state. Re-run `make configure-gh` after rotating the 1Password token.
+
 ## SSH and Git signing
 
 The deployed SSH fragment points OpenSSH at the 1Password agent socket:

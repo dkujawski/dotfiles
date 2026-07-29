@@ -36,6 +36,8 @@
 - Versioned files may contain variable names and `op://` references, never secret values.
 - Both profiles must use the shared `DOTFILES_SECRETS_FILE` mapping source and shared
   validation/loading implementation; profile-specific commands are compatibility wrappers.
+- The shared secret-helper load guard is local to one Bash process; nested shells must
+  initialize their own helper implementations.
 - Startup must not call `op`, load a secret cache, or export a credential.
 - `with-agent-secrets` scopes `op run` values to one child command.
 - `load-agent-secrets` reads only validated uppercase mappings and explicitly exports them
@@ -43,6 +45,11 @@
 - `with-human-secrets` and `load-human-secrets` provide the same scoped and explicit-import
   boundaries for the human profile; `load-secrets` remains an explicit compatibility alias.
 - No profile may create or consume a plaintext secret cache.
+- GitHub CLI authentication is an explicit operation that reads
+  `op://Employee/github-token/credential`, stores it through `gh`, verifies exact token
+  equality without printing it, and configures `github.com` Git operations for SSH.
+- GitHub CLI credential-store validation must ignore inherited `GH_TOKEN` and
+  `GITHUB_TOKEN` values so environment overrides cannot produce a false match.
 - SSH authentication uses the 1Password agent socket through an included SSH fragment;
   deployment must preserve existing SSH hosts and settings.
 
@@ -55,5 +62,8 @@
   loader scripts; dry-run reports those removals without changing them.
 - `agent-install` installs the focused Brewfile before deployment. Language runtimes remain
   owned by individual projects.
+- `configure-gh` remains separate from installation because 1Password authorization may be
+  interactive; it must fail with remediation when `gh`, `op`, token access, or SSH protocol
+  configuration is unavailable.
 - Tests must isolate HOME, mock external state, and cover normal, missing-tool, and failure
   paths without reading real secrets.

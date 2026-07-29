@@ -20,12 +20,20 @@ responsible for their own language runtimes and version constraints.
    ```bash
    make agent-check
    make agent-install
+   make configure-gh
    make agent-doctor
    ```
 
 The installer verifies Homebrew, applies the Brewfile, installs only profile-related files,
 and adds `Include ~/.ssh/config.d/*` to the existing SSH configuration. It does not replace
 existing SSH hosts or `~/.gitconfig`.
+
+`make configure-gh` is intentionally separate from deployment because it requires
+1Password authorization. It authenticates `gh` with
+`op://Employee/github-token/credential`, stores the token in the operating-system
+credential store, sets `git_protocol=ssh` for `github.com`, and verifies that the stored
+token exactly matches the 1Password value. The command does not print either token and
+does not upload an SSH key.
 
 ## Human settings
 
@@ -45,8 +53,10 @@ only when legacy human-shell credentials are required.
 ## Validation
 
 `make agent-doctor` checks the operating system, required commands, deployed profile,
-1Password CLI state, and SSH socket without displaying keys or secrets. A missing 1Password
-session is a warning because shell startup and public repository work remain usable.
+GitHub CLI SSH protocol, 1Password CLI state, and SSH socket without displaying keys or
+secrets. A missing 1Password session is a warning because shell startup and public
+repository work remain usable. An HTTPS Git protocol is an actionable failure; run
+`make configure-gh`.
 
 ## Recovery
 

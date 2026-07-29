@@ -9,6 +9,7 @@ the previous interactive configuration remains available as the human profile.
 ```bash
 make agent-check       # preview targeted home-directory changes
 make agent-install     # install required tools and deploy the agent profile
+make configure-gh      # sync gh auth from 1Password and select SSH for Git
 make agent-doctor      # validate the deployed environment
 ```
 
@@ -58,6 +59,11 @@ load-human-secrets
 Both commands read only the versioned `op://` references through the 1Password CLI.
 Private keys remain in 1Password and are exposed through its SSH agent socket. See
 [`docs/SECRETS_MANAGEMENT.md`](docs/SECRETS_MANAGEMENT.md) for setup and failure handling.
+
+`make configure-gh` is the explicit one-time GitHub CLI setup. It reads
+`op://Employee/github-token/credential`, stores that token through `gh auth login`, selects
+SSH for Git operations, and verifies both settings without printing the token. It skips
+GitHub SSH-key upload because the existing 1Password SSH agent supplies the key.
 
 ## Development
 

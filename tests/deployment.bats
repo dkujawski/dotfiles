@@ -89,3 +89,28 @@ teardown() {
   [ "$status" -ne 0 ]
   [[ "$output" == *"agent profile is missing; run 'make agent-deploy'"* ]]
 }
+
+@test "agent doctor requires gh Git operations to use SSH" {
+  local mock_bin
+  mock_bin="$(mktemp -d "${BATS_TEST_TMPDIR}/doctor-bin.XXXXXX")"
+  cat >"${mock_bin}/gh" <<'EOF'
+#!/usr/bin/env bash
+if [[ "$1 $2" == "config get" ]]; then
+  printf 'https\n'
+  exit 0
+fi
+exit 1
+EOF
+  cat >"${mock_bin}/op" <<'EOF'
+#!/usr/bin/env bash
+exit 1
+EOF
+  chmod +x "${mock_bin}/gh" "${mock_bin}/op"
+
+  run env HOME="${TEST_HOME}" PATH="${mock_bin}:${PATH}" \
+    "${REPO_ROOT}/tools/agent-doctor.sh"
+  rm -rf "${mock_bin}"
+
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"GitHub CLI uses https for Git operations; run 'make configure-gh'"* ]]
+}

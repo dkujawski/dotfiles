@@ -59,6 +59,11 @@ operating-system credential store rather than an inherited environment override.
 fails if the stored token does not exactly match the 1Password value or if `gh` does not
 report `git_protocol=ssh`. Neither token is printed.
 
+The referenced token must have the `repo`, `read:org`, and `gist` scopes required by
+`gh auth login --with-token`. If import fails for missing scopes, update or replace the
+1Password credential and re-run the command. SSH transport is configured first and remains
+active while token synchronization is unresolved.
+
 Use `tools/configure-gh.sh --dry-run` to preview the operation without reading 1Password or
 changing GitHub CLI state. Re-run `make configure-gh` after rotating the 1Password token.
 

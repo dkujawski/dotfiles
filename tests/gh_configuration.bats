@@ -30,6 +30,10 @@ case "$1 $2" in
   "auth login")
     printf '%s\n' "$*" >"${TEST_HOME}/gh-login-args"
     cat >"${TEST_HOME}/stored-token"
+    [[ "${MOCK_GH_LOGIN_FAILURE:-0}" != 1 ]]
+    ;;
+  "config set")
+    printf '%s\n' "$*" >"${TEST_HOME}/gh-config-args"
     ;;
   "config get")
     printf 'ssh\n'
@@ -67,6 +71,20 @@ EOF
   [[ "$output" == *"GitHub CLI is authenticated as dkujawski"* ]]
   [[ "$output" == *"stored token matches op://Employee/github-token/credential"* ]]
   [[ "$output" == *"Git operations use SSH"* ]]
+}
+
+@test "configures SSH before reporting a token import failure" {
+  install_op_mock
+  install_gh_mock
+
+  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    MOCK_GH_LOGIN_FAILURE=1 "${REPO_ROOT}/tools/configure-gh.sh"
+
+  [ "$status" -eq 1 ]
+  grep -Fq 'config set git_protocol ssh --host github.com' \
+    "${TEST_HOME}/gh-config-args"
+  [[ "$output" == *"could not store the 1Password token"* ]]
+  [[ "$output" == *"repo, read:org, and gist scopes"* ]]
 }
 
 @test "dry run does not read the token or change gh authentication" {

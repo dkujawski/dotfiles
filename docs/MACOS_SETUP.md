@@ -33,7 +33,9 @@ existing SSH hosts or `~/.gitconfig`.
 `op://Employee/github-token/credential`, stores the token in the operating-system
 credential store, sets `git_protocol=ssh` for `github.com`, and verifies that the stored
 token exactly matches the 1Password value. The command does not print either token and
-does not upload an SSH key.
+does not upload an SSH key. The referenced token must have the `repo`, `read:org`, and
+`gist` scopes required by `gh auth login`. SSH transport is configured before token import,
+so an insufficient token does not revert Git operations to HTTPS.
 
 ## Human settings
 

@@ -12,14 +12,16 @@
 
 ## Validation
 
-- `make test` (31 Bats tests, ShellCheck, Bash syntax checks, and authentication no-hang test)
+- `make test` (32 Bats tests, ShellCheck, Bash syntax checks, and authentication no-hang test)
 - `git diff --check`
 
 ## Deployment and rollback
 
 Deploy the profile with `make agent-deploy`, then run `make configure-gh` and approve the
 1Password prompt. Confirm the environment with `make agent-doctor`. The GitHub setup is
-separate from deployment because credential authorization may be interactive.
+separate from deployment because credential authorization may be interactive. The
+1Password token must have the `repo`, `read:org`, and `gist` scopes required by
+`gh auth login`; SSH transport remains configured if token import fails.
 
 To roll back the repository changes, revert the branch commits and run
 `make agent-deploy`. To restore HTTPS manually, run

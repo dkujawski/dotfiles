@@ -47,7 +47,8 @@
 - No profile may create or consume a plaintext secret cache.
 - GitHub CLI authentication is an explicit operation that reads
   `op://Employee/github-token/credential`, stores it through `gh`, verifies exact token
-  equality without printing it, and configures `github.com` Git operations for SSH.
+  equality without printing it, and configures `github.com` Git operations for SSH before
+  token import so insufficient token scopes cannot leave Git transport on HTTPS.
 - GitHub CLI credential-store validation must ignore inherited `GH_TOKEN` and
   `GITHUB_TOKEN` values so environment overrides cannot produce a false match.
 - SSH authentication uses the 1Password agent socket through an included SSH fragment;

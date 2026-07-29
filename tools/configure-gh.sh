@@ -43,6 +43,12 @@ gh_without_environment_token() {
     env -u GH_TOKEN -u GITHUB_TOKEN gh "$@"
 }
 
+if ! gh_without_environment_token config set git_protocol ssh --host "${GH_HOST}"; then
+    printf 'Error: GitHub CLI could not configure SSH Git operations for %s.\n' \
+        "${GH_HOST}" >&2
+    exit 1
+fi
+
 if ! github_token="$(op read "${GH_TOKEN_REFERENCE}")"; then
     printf 'Error: could not read %s; approve the 1Password prompt and verify vault access.\n' \
         "${GH_TOKEN_REFERENCE}" >&2
@@ -59,7 +65,7 @@ if ! printf '%s\n' "${github_token}" | gh_without_environment_token auth login \
     --git-protocol ssh \
     --skip-ssh-key \
     --with-token; then
-    printf 'Error: GitHub CLI could not store the 1Password token for %s; verify its scopes and validity.\n' \
+    printf 'Error: GitHub CLI could not store the 1Password token for %s; verify it has repo, read:org, and gist scopes.\n' \
         "${GH_HOST}" >&2
     exit 1
 fi

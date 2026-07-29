@@ -63,7 +63,8 @@ Private keys remain in 1Password and are exposed through its SSH agent socket. S
 `make configure-gh` is the explicit one-time GitHub CLI setup. It reads
 `op://Employee/github-token/credential`, stores that token through `gh auth login`, selects
 SSH for Git operations, and verifies both settings without printing the token. It skips
-GitHub SSH-key upload because the existing 1Password SSH agent supplies the key.
+GitHub SSH-key upload because the existing 1Password SSH agent supplies the key. The token
+must have at least the `repo`, `read:org`, and `gist` scopes required by `gh auth login`.
 
 ## Development
 

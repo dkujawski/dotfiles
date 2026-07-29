@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Shared helpers for resolving validated 1Password environment mappings.
 
-if [[ "${DOTFILES_SECRETS_HELPERS_LOADED:-0}" == 1 ]]; then
+if [[ "${DOTFILES_SECRETS_HELPERS_LOADED:-}" == "$$" ]]; then
     return 0 2>/dev/null || exit 0
 fi
-export DOTFILES_SECRETS_HELPERS_LOADED=1
+# An inherited guard belongs to the parent shell and must not suppress helpers here.
+DOTFILES_SECRETS_HELPERS_LOADED="$$"
+export -n DOTFILES_SECRETS_HELPERS_LOADED
 
 export DOTFILES_SECRETS_FILE="${DOTFILES_SECRETS_FILE:-${DOTFILES_CONFIG_DIR:-${HOME}/.config/dotfiles}/secrets/agent.env}"
 

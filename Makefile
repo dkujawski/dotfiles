@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: all agent-install agent-check agent-deploy agent-doctor human-deploy \
+.PHONY: all agent-install agent-check agent-deploy agent-doctor configure-gh human-deploy \
 	install-brew install-agent-packages install-dotfiles deploy-load-secrets \
 	check check-extra clear-secrets-cache clean force test help
 
@@ -16,6 +16,9 @@ agent-deploy:
 
 agent-doctor:
 	@./tools/agent-doctor.sh
+
+configure-gh:
+	@./tools/configure-gh.sh
 
 human-deploy:
 	@./tools/deploy-agent.sh --profile human
@@ -54,12 +57,12 @@ test:
 		home/.config/dotfiles/lib/secrets.bash \
 		home/.config/dotfiles/profiles/*.bash home/.local/share/bash/exports.sh \
 		home/.local/share/bash/load-secrets.sh home/.local/share/bash/paths.sh \
-		tools/deploy-agent.sh tools/agent-doctor.sh
+		tools/deploy-agent.sh tools/agent-doctor.sh tools/configure-gh.sh
 	@bash -n home/.bash_profile home/.bash_prompt home/.bashrc \
 		home/.config/dotfiles/lib/secrets.bash home/.config/dotfiles/profiles/*.bash \
 		home/.local/share/bash/exports.sh home/.local/share/bash/load-secrets.sh \
 		home/.local/share/bash/paths.sh tools/deploy-agent.sh tools/agent-doctor.sh \
-		bootstrap.sh
+		tools/configure-gh.sh bootstrap.sh
 	@./test-auth.sh
 
 help:
@@ -68,5 +71,6 @@ help:
 	@echo "  make agent-install     Install Homebrew dependencies and deploy (default)"
 	@echo "  make agent-deploy      Deploy configuration without installing packages"
 	@echo "  make agent-doctor      Validate tools, 1Password, and SSH integration"
+	@echo "  make configure-gh      Sync gh auth from 1Password and use SSH for Git"
 	@echo "  make human-deploy      Install preserved human shell modules"
 	@echo "  make test              Run deterministic shell tests"

@@ -22,6 +22,17 @@ for command_name in bash brew git gh jq rg fd fzf delta make op shellcheck bats 
     fi
 done
 
+if command -v gh >/dev/null 2>&1; then
+    if gh_git_protocol="$(env -u GH_TOKEN -u GITHUB_TOKEN \
+        gh config get git_protocol --host github.com 2>/dev/null)" && \
+        [[ "${gh_git_protocol}" == ssh ]]; then
+        pass 'GitHub CLI uses SSH for Git operations'
+    else
+        gh_git_protocol="${gh_git_protocol:-unconfigured}"
+        fail "GitHub CLI uses ${gh_git_protocol} for Git operations; run 'make configure-gh'"
+    fi
+fi
+
 if [[ -r "${TARGET_HOME}/.config/dotfiles/profiles/agent.bash" ]]; then
     pass 'agent profile is deployed'
 else

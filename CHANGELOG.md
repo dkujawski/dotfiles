@@ -30,6 +30,8 @@
   upstream, path, and iTerm title state with at most two Git commands per refresh.
 - Deployment diagnostics now reject GitHub CLI HTTPS Git transport with an actionable
   `make configure-gh` remediation.
+- Human startup now bypasses the historical secret-loader shim so a stale deployed copy
+  cannot terminate the current shell.
 
 ### Security
 

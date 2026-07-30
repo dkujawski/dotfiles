@@ -44,6 +44,8 @@
   into the current shell without `eval` or persistent plaintext storage.
 - `with-human-secrets` and `load-human-secrets` provide the same scoped and explicit-import
   boundaries for the human profile; `load-secrets` remains an explicit compatibility alias.
+- Human startup must load those entry points from the config-managed library and must not
+  source the historical `~/.local/share/bash/load-secrets.sh` compatibility shim.
 - No profile may create or consume a plaintext secret cache.
 - GitHub CLI authentication is an explicit operation that reads
   `op://Employee/github-token/credential`, stores it through `gh`, verifies exact token

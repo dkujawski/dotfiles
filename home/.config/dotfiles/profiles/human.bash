@@ -20,7 +20,9 @@ fi
 source "${CONF}/utility-functions.sh"
 source "${CONF}/paths.sh"
 source "${CONF}/exports.sh"
-source "${CONF}/load-secrets.sh"
+# Load secret entry points from the config-managed library so a stale legacy module
+# cannot terminate the current shell during startup.
+source "${DOTFILES_CONFIG_DIR}/lib/human-secrets.bash"
 source "${CONF}/aliases.sh"
 source "${CONF}/functions.sh"
 source "${CONF}/git-functions.sh"

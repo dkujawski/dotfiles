@@ -38,6 +38,20 @@ EOF
   [ ! -e "${OP_CALLED_FILE}" ]
 }
 
+@test "human startup ignores a stale legacy secrets module" {
+  cat >"${TEST_HOME}/.local/share/bash/load-secrets.sh" <<'EOF'
+printf 'stale legacy secrets module was sourced\n' >&2
+exit 42
+EOF
+
+  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; declare -F load-human-secrets >/dev/null; printf "shell-alive"'
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "shell-alive" ]
+}
+
 @test "with-human-secrets limits credentials to one child command" {
   cat >"${MOCK_BIN}/op" <<'EOF'
 #!/usr/bin/env bash

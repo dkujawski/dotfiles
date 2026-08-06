@@ -41,8 +41,11 @@ so an insufficient token does not revert Git operations to HTTPS.
 
 Install the legacy modules on a clean machine with `make human-deploy`. Then use
 `load-human-profile` in an existing agent shell or `human-shell` for a fresh login shell.
-The next ordinary shell still defaults to the agent profile. Human startup defines
-`with-human-secrets` and `load-human-secrets` but does not resolve credentials.
+The next ordinary shell still defaults to the agent profile. Human profile loading requires
+the `op` command. It checks `op whoami`, runs `op signin` interactively when authentication
+is required, then verifies `op whoami` again before sourcing human modules. Unlock
+1Password and enable CLI integration in **Settings → Developer** if sign-in fails. Human
+startup defines `with-human-secrets` and `load-human-secrets` but does not resolve credentials.
 
 Agent and human deployment remove obsolete secret loader scripts and the known legacy
 plaintext cache directories. Those caches are intentionally not copied into the backup.

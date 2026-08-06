@@ -117,19 +117,121 @@ EOF
   [[ "$output" == *"1Password CLI 'op' is required"* ]]
 }
 
-@test "load-human-profile changes the existing shell" {
+@test "load-human-profile skips signin when op is already authenticated" {
   cat >"${TEST_HOME}/human-test.bash" <<'EOF'
 export HUMAN_PROFILE_LOADED=1
 alias human-only='true'
 EOF
+  cat >"${MOCK_BIN}/op" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >"${OP_CALLED_FILE}"
+[[ "$1" == "whoami" ]]
+EOF
+  chmod +x "${MOCK_BIN}/op"
+  export OP_CALLED_FILE="${TEST_HOME}/op-called"
 
-  run env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
+  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    OP_CALLED_FILE="${OP_CALLED_FILE}" DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; load-human-profile; alias human-only; printf "|%s|%s" "$DOTFILES_PROFILE" "$HUMAN_PROFILE_LOADED"'
 
   [ "$status" -eq 0 ]
   [[ "$output" == *"alias human-only='true'"* ]]
   [[ "$output" == *"|human|1"* ]]
+  [ "$(<"${OP_CALLED_FILE}")" = "whoami" ]
+}
+
+@test "load-human-profile signs in before loading when authentication is required" {
+  cat >"${TEST_HOME}/human-test.bash" <<'EOF'
+export HUMAN_PROFILE_LOADED=1
+alias human-only='true'
+EOF
+  cat >"${MOCK_BIN}/op" <<'EOF'
+#!/usr/bin/env bash
+case "$1" in
+  whoami) [[ -e "${OP_SIGNED_IN_FILE}" ]] ;;
+  signin) touch "${OP_SIGNED_IN_FILE}" ;;
+  *) exit 90 ;;
+esac
+EOF
+  chmod +x "${MOCK_BIN}/op"
+  export OP_SIGNED_IN_FILE="${TEST_HOME}/op-signed-in"
+
+  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    OP_SIGNED_IN_FILE="${OP_SIGNED_IN_FILE}" \
+    DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; load-human-profile; alias human-only; printf "|%s|%s" "$DOTFILES_PROFILE" "$HUMAN_PROFILE_LOADED"'
+
+  [ "$status" -eq 0 ]
+  [ -e "${OP_SIGNED_IN_FILE}" ]
+  [[ "$output" == *"Signing in to 1Password CLI"* ]]
+  [[ "$output" == *"alias human-only='true'"* ]]
+  [[ "$output" == *"|human|1"* ]]
+}
+
+@test "load-human-profile fails before loading when op is unavailable" {
+  cat >"${TEST_HOME}/human-test.bash" <<'EOF'
+export HUMAN_PROFILE_LOADED=1
+EOF
+
+  run -127 env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
+    DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; load-human-profile; status=$?; printf "|%s|%s" "$DOTFILES_PROFILE" "${HUMAN_PROFILE_LOADED:-unset}"; exit "$status"'
+
+  [ "$status" -eq 127 ]
+  [[ "$output" == *"1Password CLI 'op' is required"* ]]
+  [[ "$output" == *"|agent|unset"* ]]
+}
+
+@test "load-human-profile fails before loading when op signin fails" {
+  cat >"${TEST_HOME}/human-test.bash" <<'EOF'
+export HUMAN_PROFILE_LOADED=1
+EOF
+  cat >"${MOCK_BIN}/op" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${OP_CALLED_FILE}"
+exit 1
+EOF
+  chmod +x "${MOCK_BIN}/op"
+  export OP_CALLED_FILE="${TEST_HOME}/op-called"
+
+  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    OP_CALLED_FILE="${OP_CALLED_FILE}" \
+    DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; load-human-profile; status=$?; printf "|%s|%s" "$DOTFILES_PROFILE" "${HUMAN_PROFILE_LOADED:-unset}"; exit "$status"'
+
+  [ "$status" -eq 1 ]
+  [ "$(<"${OP_CALLED_FILE}")" = $'whoami\nsignin' ]
+  [[ "$output" == *"1Password CLI sign-in failed"* ]]
+  [[ "$output" == *"|agent|unset"* ]]
+}
+
+@test "load-human-profile verifies authentication after op signin" {
+  cat >"${TEST_HOME}/human-test.bash" <<'EOF'
+export HUMAN_PROFILE_LOADED=1
+EOF
+  cat >"${MOCK_BIN}/op" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${OP_CALLED_FILE}"
+[[ "$1" == signin ]]
+EOF
+  chmod +x "${MOCK_BIN}/op"
+  export OP_CALLED_FILE="${TEST_HOME}/op-called"
+
+  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    OP_CALLED_FILE="${OP_CALLED_FILE}" \
+    DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; load-human-profile; status=$?; printf "|%s|%s" "$DOTFILES_PROFILE" "${HUMAN_PROFILE_LOADED:-unset}"; exit "$status"'
+
+  [ "$status" -eq 1 ]
+  [ "$(<"${OP_CALLED_FILE}")" = $'whoami\nsignin\nwhoami' ]
+  [[ "$output" == *"could not be verified after sign-in"* ]]
+  [[ "$output" == *"|agent|unset"* ]]
 }
 
 @test "versioned SSH fragment selects the 1Password agent" {

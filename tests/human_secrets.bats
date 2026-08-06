@@ -21,21 +21,29 @@ teardown() {
   rm -rf "${TEST_HOME}" "${MOCK_BIN}"
 }
 
-@test "human startup exposes secret helpers without invoking op" {
+@test "human startup authenticates op without resolving secrets" {
   cat >"${MOCK_BIN}/op" <<'EOF'
 #!/usr/bin/env bash
-touch "${OP_CALLED_FILE}"
+if [[ "$1" == whoami ]]; then
+  touch "${OP_AUTHENTICATED_FILE}"
+  exit 0
+fi
+touch "${OP_SECRET_CALLED_FILE}"
 exit 99
 EOF
   chmod +x "${MOCK_BIN}/op"
-  export OP_CALLED_FILE="${TEST_HOME}/op-called"
+  export OP_AUTHENTICATED_FILE="${TEST_HOME}/op-authenticated"
+  export OP_SECRET_CALLED_FILE="${TEST_HOME}/op-secret-called"
 
   run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+    OP_AUTHENTICATED_FILE="${OP_AUTHENTICATED_FILE}" \
+    OP_SECRET_CALLED_FILE="${OP_SECRET_CALLED_FILE}" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile" && declare -F with-human-secrets >/dev/null && declare -F load-human-secrets >/dev/null && declare -F load-secrets >/dev/null'
 
   [ "$status" -eq 0 ]
-  [ ! -e "${OP_CALLED_FILE}" ]
+  [ -e "${OP_AUTHENTICATED_FILE}" ]
+  [ ! -e "${OP_SECRET_CALLED_FILE}" ]
 }
 
 @test "human startup ignores a stale legacy secrets module" {
@@ -43,6 +51,11 @@ EOF
 printf 'stale legacy secrets module was sourced\n' >&2
 exit 42
 EOF
+  cat >"${MOCK_BIN}/op" <<'EOF'
+#!/usr/bin/env bash
+[[ "$1" == whoami ]]
+EOF
+  chmod +x "${MOCK_BIN}/op"
 
   run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     /opt/homebrew/bin/bash --noprofile --norc -c \
@@ -55,6 +68,7 @@ EOF
 @test "with-human-secrets limits credentials to one child command" {
   cat >"${MOCK_BIN}/op" <<'EOF'
 #!/usr/bin/env bash
+[[ "$1" == whoami ]] && exit 0
 [[ "$1" == run ]] || exit 90
 shift
 [[ "$1" == --env-file=* ]] || exit 91
@@ -76,6 +90,7 @@ EOF
 @test "load-human-secrets explicitly imports validated references" {
   cat >"${MOCK_BIN}/op" <<'EOF'
 #!/usr/bin/env bash
+[[ "$1" == whoami ]] && exit 0
 [[ "$1" == read ]] || exit 90
 printf 'value for %s' "$2"
 EOF
@@ -95,6 +110,7 @@ SHARED_TOKEN=op://Employee/shared-token/credential
 EOF
   cat >"${MOCK_BIN}/op" <<'EOF'
 #!/usr/bin/env bash
+[[ "$1" == whoami ]] && exit 0
 [[ "$1" == read ]] || exit 90
 printf 'value for %s' "$2"
 EOF
@@ -109,13 +125,13 @@ EOF
   [[ "$output" == *"value for op://Employee/shared-token/credential" ]]
 }
 
-@test "human secret helper reports a missing op command" {
-  run -127 env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+@test "human profile reports a missing op command" {
+  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
-    'source "$HOME/.bash_profile"; with-human-secrets -- true'
+    'source "$HOME/.bash_profile"'
 
-  [ "$status" -ne 0 ]
+  [ "$status" -eq 1 ]
   [[ "$output" == *"1Password CLI 'op' is required"* ]]
 }
 
@@ -125,6 +141,7 @@ lowercase_name=op://Employee/example/credential
 EOF
   cat >"${MOCK_BIN}/op" <<'EOF'
 #!/usr/bin/env bash
+[[ "$1" == whoami ]] && exit 0
 exit 98
 EOF
   chmod +x "${MOCK_BIN}/op"

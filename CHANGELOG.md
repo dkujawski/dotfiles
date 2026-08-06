@@ -19,6 +19,8 @@
 - Live iTerm preferences are synchronized with the current laptop deployment.
 - Human shell startup now defines scoped and explicit-import secret helpers instead of
   resolving all credentials eagerly.
+- Human profile loading now verifies 1Password CLI authentication, runs `op signin` for the
+  user when required, and sources human modules only after successful verification.
 - Agent and human profiles now share one secret mapping source and validation/loading
   implementation while retaining their profile-specific commands.
 - Bash profile guards are process-local so nested shells initialize the selected profile.

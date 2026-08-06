@@ -41,8 +41,9 @@ A service-account token may be supplied by the invoking process for unattended e
 but it must itself come from an approved external credential source and must never be added
 to these dotfiles.
 
-If `op` is missing, unauthenticated, or lacks vault access, helpers fail with a remediation
-message while ordinary shell startup continues normally.
+If `op` is missing, unauthenticated, or lacks vault access, secret helpers fail with a
+remediation message while agent shell startup continues normally. Human profile loading
+runs `op whoami` first and stops before sourcing human modules when authentication fails.
 
 ## GitHub CLI authentication
 
@@ -84,8 +85,9 @@ authorization in 1Password rather than copying keys into `~/.ssh`.
 
 ## Human profile
 
-The human profile also leaves credentials unresolved during startup. Prefer a scope around
-one child command:
+The human profile requires an available, authenticated 1Password CLI. Loading it runs
+`op whoami`, which may prompt through the desktop app, but leaves credentials unresolved.
+Prefer a scope around one child command:
 
 ```bash
 with-human-secrets -- terraform plan

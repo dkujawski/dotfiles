@@ -10,8 +10,9 @@
   optional tools, a TTY, 1Password authentication, or an SSH-agent socket.
 - `load-human-profile` sources human settings into the current shell; `human-shell` starts
   a human login shell. Human configuration must not be loaded implicitly for agents.
-- Human startup may define secret helpers but must not call `op`, read a secret cache, or
-  export a credential.
+- Human startup must require an available, authenticated 1Password CLI by running
+  `op whoami` before sourcing human modules. Failure must leave the current agent profile
+  unchanged and provide an actionable remedy.
 
 ## Agent environment
 
@@ -22,9 +23,10 @@
 
 ## Human interactive performance
 
-- Opening a human shell must not resolve secrets or eagerly initialize NVM, pyenv, or the
-  global Bash completion framework. Secrets stay behind `load-secrets`; NVM and completion
-  initialize on first use; pyenv is available through its bin and shims directories.
+- Opening a human shell may verify 1Password CLI authentication but must not resolve secrets
+  or eagerly initialize NVM, pyenv, or the global Bash completion framework. Secrets stay
+  behind `load-secrets`; NVM and completion initialize on first use; pyenv is available
+  through its bin and shims directories.
 - Startup modules are sourced directly without background spinner processes, and Homebrew
   paths are derived without invoking `brew` during startup.
 - A prompt render in a Git worktree uses no more than two Git commands while preserving the
@@ -38,7 +40,8 @@
   validation/loading implementation; profile-specific commands are compatibility wrappers.
 - The shared secret-helper load guard is local to one Bash process; nested shells must
   initialize their own helper implementations.
-- Startup must not call `op`, load a secret cache, or export a credential.
+- Agent startup must not call `op`, load a secret cache, or export a credential. Human
+  startup may call only `op whoami` to verify authentication and must not read secrets.
 - `with-agent-secrets` scopes `op run` values to one child command.
 - `load-agent-secrets` reads only validated uppercase mappings and explicitly exports them
   into the current shell without `eval` or persistent plaintext storage.

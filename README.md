@@ -37,8 +37,10 @@ human-shell
 
 `DOTFILES_PROFILE=human bash -l` is also supported. Run `make human-deploy` on a clean
 machine to install the prompt, aliases, functions, and opt-in secret helpers without
-changing the default profile. Human startup does not resolve or export credentials, and
-NVM and global Bash completion load on first use to keep startup responsive.
+changing the default profile. Loading the human profile requires `op` and verifies the
+current 1Password CLI session with `op whoami`; unlock 1Password and enable CLI integration
+if verification fails. Human startup does not resolve or export credentials, and NVM and
+global Bash completion load on first use to keep startup responsive.
 
 ## Secrets and SSH
 

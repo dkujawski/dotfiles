@@ -10,8 +10,16 @@ _dotfiles_require_1password_cli() {
         printf "Error: 1Password CLI 'op' is required. Install it and enable desktop integration.\n" >&2
         return 127
     fi
+    if op whoami >/dev/null 2>&1; then
+        return 0
+    fi
+    printf 'Signing in to 1Password CLI...\n' >&2
+    if ! op signin >/dev/null; then
+        printf 'Error: 1Password CLI sign-in failed. Unlock 1Password, enable CLI integration in Settings > Developer, then retry.\n' >&2
+        return 1
+    fi
     if ! op whoami >/dev/null 2>&1; then
-        printf 'Error: 1Password CLI is not authenticated. Unlock 1Password, enable CLI integration in Settings > Developer, then retry.\n' >&2
+        printf 'Error: 1Password CLI authentication could not be verified after sign-in. Run `op whoami`, then retry.\n' >&2
         return 1
     fi
 }

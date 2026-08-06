@@ -1,6 +1,7 @@
 ## Summary
 
-- Require `op` and a successful `op whoami` before loading the human shell profile.
+- Require `op`, run `op signin` when needed, and verify `op whoami` before loading the
+  human shell profile.
 - Leave the current agent profile unchanged when 1Password CLI validation fails.
 - Document the new human-profile authentication requirement and recovery steps.
 

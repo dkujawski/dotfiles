@@ -43,7 +43,8 @@ to these dotfiles.
 
 If `op` is missing, unauthenticated, or lacks vault access, secret helpers fail with a
 remediation message while agent shell startup continues normally. Human profile loading
-runs `op whoami` first and stops before sourcing human modules when authentication fails.
+checks `op whoami`, runs interactive `op signin` when needed, and verifies authentication
+again before sourcing human modules. Failed or unverifiable sign-in leaves them unloaded.
 
 ## GitHub CLI authentication
 
@@ -85,9 +86,11 @@ authorization in 1Password rather than copying keys into `~/.ssh`.
 
 ## Human profile
 
-The human profile requires an available, authenticated 1Password CLI. Loading it runs
-`op whoami`, which may prompt through the desktop app, but leaves credentials unresolved.
-Prefer a scope around one child command:
+The human profile requires an available, authenticated 1Password CLI. Loading it checks
+`op whoami`; when necessary, it runs `op signin` in the foreground for user authorization
+and verifies the resulting session. Sign-in stdout is discarded so a manual-mode session
+token is not displayed. This leaves credentials unresolved. Prefer a scope around one child
+command:
 
 ```bash
 with-human-secrets -- terraform plan

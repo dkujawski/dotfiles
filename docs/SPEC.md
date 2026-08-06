@@ -10,9 +10,10 @@
   optional tools, a TTY, 1Password authentication, or an SSH-agent socket.
 - `load-human-profile` sources human settings into the current shell; `human-shell` starts
   a human login shell. Human configuration must not be loaded implicitly for agents.
-- Human startup must require an available, authenticated 1Password CLI by running
-  `op whoami` before sourcing human modules. Failure must leave the current agent profile
-  unchanged and provide an actionable remedy.
+- Human startup must require an available, authenticated 1Password CLI. It checks
+  `op whoami`, runs foreground `op signin` when authentication is required, and verifies
+  `op whoami` again before sourcing human modules. Failure must leave the current agent
+  profile unchanged and provide an actionable remedy.
 
 ## Agent environment
 
@@ -41,7 +42,8 @@
 - The shared secret-helper load guard is local to one Bash process; nested shells must
   initialize their own helper implementations.
 - Agent startup must not call `op`, load a secret cache, or export a credential. Human
-  startup may call only `op whoami` to verify authentication and must not read secrets.
+  startup may call only `op whoami` and `op signin` for authentication and must not read
+  secrets. Sign-in stdout must be discarded to avoid displaying a manual session token.
 - `with-agent-secrets` scopes `op run` values to one child command.
 - `load-agent-secrets` reads only validated uppercase mappings and explicitly exports them
   into the current shell without `eval` or persistent plaintext storage.

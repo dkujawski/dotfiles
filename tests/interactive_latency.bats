@@ -38,6 +38,12 @@ EOF
   cat >"${TEST_HOME}/.pyenv/bin/pyenv" <<EOF
 #!/usr/bin/env bash
 touch "${TEST_HOME}/pyenv-called"
+if [[ "\$1" == "init" && "\$2" == "-" ]]; then
+  cat <<'INIT'
+pyenv() { :; }
+INIT
+  exit 0
+fi
 EOF
   chmod +x "${TEST_HOME}/.pyenv/bin/pyenv"
 
@@ -50,14 +56,16 @@ EOF
         ! -e "$HOME/completion-loaded" && ! -e "$HOME/pyenv-called" ]] &&
        touch "$HOME/startup-deferred"
      nvm --version
-     _dotfiles_load_completion test-command'
+     _dotfiles_load_completion test-command
+     pyenv shell 3.12.7
+     [[ -e "$HOME/pyenv-called" ]] && touch "$HOME/pyenv-loaded-on-demand"'
 
   [ "$status" -eq 0 ]
   [ -e "${TEST_HOME}/startup-deferred" ]
   [ ! -e "${TEST_HOME}/secrets-loaded" ]
   [ -e "${TEST_HOME}/nvm-loaded" ]
   [ -e "${TEST_HOME}/completion-loaded" ]
-  [ ! -e "${TEST_HOME}/pyenv-called" ]
+  [ -e "${TEST_HOME}/pyenv-loaded-on-demand" ]
 }
 
 @test "prompt renders Git state with at most two Git processes" {

@@ -28,6 +28,11 @@ _dotfiles_path_prepend "${HOME}/.local/bin"
 DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}"
 _dotfiles_path_append "${DOTFILES_HOMEBREW_PREFIX}/bin"
 _dotfiles_path_append "${DOTFILES_HOMEBREW_PREFIX}/sbin"
+if [[ -d "${HOME}/.pyenv" ]]; then
+    export PYENV_ROOT="${HOME}/.pyenv"
+    _dotfiles_path_prepend "${PYENV_ROOT}/shims"
+    _dotfiles_path_prepend "${PYENV_ROOT}/bin"
+fi
 export PATH
 export DOTFILES_HOMEBREW_PREFIX
 unset -f _dotfiles_path_prepend _dotfiles_path_append

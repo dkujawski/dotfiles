@@ -50,10 +50,13 @@ startup defines `with-human-secrets` and `load-human-secrets` but does not resol
 Agent and human deployment remove obsolete secret loader scripts and the known legacy
 plaintext cache directories. Those caches are intentionally not copied into the backup.
 
+When `~/.pyenv` exists, the agent profile puts pyenv bin and shims on `PATH` so project
+`.python-version` files resolve the correct Python without running `pyenv init`.
+
 Human shells defer optional work: NVM loads on the first `nvm`, `node`, `npm`, or `npx`
-command, and the global completion framework loads on the first completion request. pyenv's
-bin and shims are placed on `PATH` without running `pyenv init`. Run `load-secrets` explicitly
-only when legacy human-shell credentials are required.
+command, the global completion framework loads on the first completion request, and pyenv
+shell integration loads on the first `pyenv` command. Run `load-secrets` explicitly only
+when legacy human-shell credentials are required.
 
 ## Validation
 

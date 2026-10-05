@@ -20,14 +20,15 @@
 - Standard commands must not be replaced by aliases.
 - Pagers and Git editors must not block automation; Git credential prompting is disabled.
 - Homebrew and `~/.local/bin` are added without deleting or duplicating caller PATH entries.
+- When `~/.pyenv` exists, agent startup puts pyenv bin and shims on `PATH` so project
+  `.python-version` files are honored; it must not run `pyenv init` or invoke pyenv.
 - Optional tool initialization is conditional and failures include an actionable remedy.
 
 ## Human interactive performance
 
 - Opening a human shell may verify 1Password CLI authentication but must not resolve secrets
   or eagerly initialize NVM, pyenv, or the global Bash completion framework. Secrets stay
-  behind `load-secrets`; NVM and completion initialize on first use; pyenv is available
-  through its bin and shims directories.
+  behind `load-secrets`; NVM, pyenv, and completion initialize on first use.
 - Startup modules are sourced directly without background spinner processes, and Homebrew
   paths are derived without invoking `brew` during startup.
 - A prompt render in a Git worktree uses no more than two Git commands while preserving the

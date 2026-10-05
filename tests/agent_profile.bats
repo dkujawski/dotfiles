@@ -234,6 +234,26 @@ EOF
   [[ "$output" == *"|agent|unset"* ]]
 }
 
+@test "agent profile puts pyenv on PATH without invoking it" {
+  mkdir -p "${TEST_HOME}/.pyenv/bin" "${TEST_HOME}/.pyenv/shims"
+  cat >"${TEST_HOME}/.pyenv/bin/pyenv" <<EOF
+#!/usr/bin/env bash
+touch "${TEST_HOME}/pyenv-called"
+EOF
+  chmod +x "${TEST_HOME}/.pyenv/bin/pyenv"
+
+  run env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; printf "%s|%s" "$PYENV_ROOT" "$PATH"'
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == "${TEST_HOME}/.pyenv|"* ]]
+  [[ "$output" == *"${TEST_HOME}/.pyenv/bin"* ]]
+  [[ "$output" == *"${TEST_HOME}/.pyenv/shims"* ]]
+  [ ! -e "${TEST_HOME}/pyenv-called" ]
+}
+
 @test "versioned SSH fragment selects the 1Password agent" {
   run grep -F 'IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"' \
     "${REPO_ROOT}/home/.ssh/config.d/1password.conf"

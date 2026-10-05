@@ -73,3 +73,10 @@ export PYENV_ROOT="${HOME}/.pyenv"
 path_prepend "${PYENV_ROOT}/shims"
 path_prepend "${PYENV_ROOT}/bin"
 export PATH
+if [[ -x "${PYENV_ROOT}/bin/pyenv" ]]; then
+    _dotfiles_load_pyenv() {
+        unset -f pyenv _dotfiles_load_pyenv
+        eval "$(command pyenv init -)"
+    }
+    pyenv() { _dotfiles_load_pyenv && pyenv "$@"; }
+fi

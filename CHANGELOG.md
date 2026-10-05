@@ -26,8 +26,11 @@
 - Bash profile guards are process-local so nested shells initialize the selected profile.
 - The shared secret-helper guard is process-local so fresh nested shells retain working
   scoped and explicit-import commands.
-- Human interactive startup now defers secrets, NVM, and Bash completion, avoids redundant
-  Homebrew and spinner subprocesses, and exposes pyenv through `PATH` without eager init.
+- Human interactive startup now defers secrets, NVM, Bash completion, and pyenv shell
+  integration (loaded on first `pyenv` use), and avoids redundant Homebrew and spinner
+  subprocesses.
+- Agent startup puts pyenv bin and shims on `PATH` when `~/.pyenv` exists so project
+  `.python-version` files are honored without running `pyenv init`.
 - Git prompt rendering now preserves command status while collecting branch, worktree,
   upstream, path, and iTerm title state with at most two Git commands per refresh.
 - Deployment diagnostics now reject GitHub CLI HTTPS Git transport with an actionable

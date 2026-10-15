@@ -4,6 +4,15 @@ export DOTFILES_PROFILE=human
 export DEBUG="${DEBUG:-0}"
 shopt -s checkwinsize
 
+# Undo agent-automation defaults so interactive tools work after load-human-profile.
+export PAGER=less
+unset GIT_PAGER GH_PAGER SYSTEMD_PAGER AWS_PAGER MANPAGER
+unset GIT_EDITOR GIT_SEQUENCE_EDITOR GIT_TERMINAL_PROMPT
+unset GIT_ASKPASS SSH_ASKPASS SSH_ASKPASS_REQUIRE GIT_MERGE_AUTOEDIT
+unset NO_COLOR CLICOLOR BASH_ENV
+unset HISTFILE HISTSIZE HISTFILESIZE
+# EDITOR/VISUAL are restored by exports.sh to vim.
+
 debug_log() {
     if [[ "${DEBUG}" == 1 || "${DEBUG}" == true ]]; then
         printf '[DEBUG] %s\n' "$1"

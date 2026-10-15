@@ -2,14 +2,17 @@
 
 setup() {
   bats_require_minimum_version 1.5.0
-  unset DOTFILES_AGENT_PROFILE_LOADED DOTFILES_CONFIG_DIR DOTFILES_HOMEBREW_PREFIX \
-    DOTFILES_HUMAN_PROFILE DOTFILES_OP_SSH_AUTH_SOCK DOTFILES_PROFILE \
-    DOTFILES_PROFILE_LOADED DOTFILES_SECRETS_FILE
+  unset BASH_ENV DOTFILES_AGENT_PROFILE_LOADED DOTFILES_CONFIG_DIR \
+    DOTFILES_HOMEBREW_PREFIX DOTFILES_HUMAN_PROFILE DOTFILES_OP_SSH_AUTH_SOCK \
+    DOTFILES_PROFILE DOTFILES_PROFILE_LOADED DOTFILES_SECRETS_FILE \
+    DOTFILES_SECRETS_HELPERS_LOADED
   REPO_ROOT="$(cd "${BATS_TEST_DIRNAME}/.." && pwd)"
   TEST_HOME="$(mktemp -d "${BATS_TEST_TMPDIR}/home.XXXXXX")"
   MOCK_BIN="$(mktemp -d "${BATS_TEST_TMPDIR}/bin.XXXXXX")"
   DOTFILES_CONFIG_DIR="${TEST_HOME}/.config/dotfiles"
-  export REPO_ROOT TEST_HOME MOCK_BIN DOTFILES_CONFIG_DIR
+  # Keep Homebrew promotion from shadowing MOCK_BIN unless a test opts in.
+  DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew"
+  export REPO_ROOT TEST_HOME MOCK_BIN DOTFILES_CONFIG_DIR DOTFILES_HOMEBREW_PREFIX
   mkdir -p "${TEST_HOME}/.config/dotfiles/profiles" "${TEST_HOME}/.config/dotfiles/secrets"
   cp "${REPO_ROOT}/home/.bash_profile" "${TEST_HOME}/.bash_profile"
   cp "${REPO_ROOT}/home/.bashrc" "${TEST_HOME}/.bashrc"
@@ -31,7 +34,9 @@ EOF
   chmod +x "${MOCK_BIN}/op"
   export OP_CALLED_FILE="${TEST_HOME}/op-called"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV -u DOTFILES_SECRETS_FILE \
+    HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX}" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; printf "%s|%s|%s" "$DOTFILES_PROFILE" "$PAGER" "$GIT_TERMINAL_PROMPT"'
 
@@ -84,7 +89,9 @@ GITHUB_TOKEN='scoped value' "$@"
 EOF
   chmod +x "${MOCK_BIN}/op"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV -u DOTFILES_SECRETS_FILE \
+    HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX}" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; with-agent-secrets -- bash -c '\''printf "%s" "$GITHUB_TOKEN"'\'''
 
@@ -100,7 +107,9 @@ printf 'value for %s' "$2"
 EOF
   chmod +x "${MOCK_BIN}/op"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV -u DOTFILES_SECRETS_FILE \
+    HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX}" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; load-agent-secrets; printf "%s" "$GITHUB_TOKEN"'
 
@@ -130,7 +139,9 @@ EOF
   chmod +x "${MOCK_BIN}/op"
   export OP_CALLED_FILE="${TEST_HOME}/op-called"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV -u DOTFILES_SECRETS_FILE \
+    HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX}" \
     OP_CALLED_FILE="${OP_CALLED_FILE}" DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; load-human-profile; alias human-only; printf "|%s|%s" "$DOTFILES_PROFILE" "$HUMAN_PROFILE_LOADED"'
@@ -157,7 +168,9 @@ EOF
   chmod +x "${MOCK_BIN}/op"
   export OP_SIGNED_IN_FILE="${TEST_HOME}/op-signed-in"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV -u DOTFILES_SECRETS_FILE \
+    HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX}" \
     OP_SIGNED_IN_FILE="${OP_SIGNED_IN_FILE}" \
     DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
@@ -198,7 +211,9 @@ EOF
   chmod +x "${MOCK_BIN}/op"
   export OP_CALLED_FILE="${TEST_HOME}/op-called"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV -u DOTFILES_SECRETS_FILE \
+    HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX}" \
     OP_CALLED_FILE="${OP_CALLED_FILE}" \
     DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
@@ -222,7 +237,9 @@ EOF
   chmod +x "${MOCK_BIN}/op"
   export OP_CALLED_FILE="${TEST_HOME}/op-called"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV -u DOTFILES_SECRETS_FILE \
+    HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX}" \
     OP_CALLED_FILE="${OP_CALLED_FILE}" \
     DOTFILES_HUMAN_PROFILE="${TEST_HOME}/human-test.bash" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
@@ -259,4 +276,132 @@ EOF
     "${REPO_ROOT}/home/.ssh/config.d/1password.conf"
 
   [ "$status" -eq 0 ]
+}
+
+@test "agent PATH promotes Homebrew ahead of inherited /usr/bin" {
+  mkdir -p "${TEST_HOME}/hb/bin" "${TEST_HOME}/usr/bin"
+  printf '#!/bin/sh\necho brew-git\n' >"${TEST_HOME}/hb/bin/git"
+  printf '#!/bin/sh\necho system-git\n' >"${TEST_HOME}/usr/bin/git"
+  chmod +x "${TEST_HOME}/hb/bin/git" "${TEST_HOME}/usr/bin/git"
+
+  run env HOME="${TEST_HOME}" PATH="${TEST_HOME}/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/hb" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; command -v git; git'
+
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = "${TEST_HOME}/hb/bin/git" ]
+  [ "${lines[1]}" = "brew-git" ]
+}
+
+@test "agent PATH promotes gnubin ahead of Homebrew bin" {
+  mkdir -p "${TEST_HOME}/hb/bin" \
+    "${TEST_HOME}/hb/opt/gnu-sed/libexec/gnubin"
+  printf '#!/bin/sh\necho brew-sed\n' >"${TEST_HOME}/hb/bin/sed"
+  printf '#!/bin/sh\necho gnu-sed\n' \
+    >"${TEST_HOME}/hb/opt/gnu-sed/libexec/gnubin/sed"
+  chmod +x "${TEST_HOME}/hb/bin/sed" \
+    "${TEST_HOME}/hb/opt/gnu-sed/libexec/gnubin/sed"
+
+  run env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/hb" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; command -v sed; sed'
+
+  [ "$status" -eq 0 ]
+  [ "${lines[0]}" = "${TEST_HOME}/hb/opt/gnu-sed/libexec/gnubin/sed" ]
+  [ "${lines[1]}" = "gnu-sed" ]
+}
+
+@test "agent PATH drops empty, current-directory, and duplicate entries" {
+  mkdir -p "${TEST_HOME}/hb/bin" "${TEST_HOME}/.local/bin"
+
+  run env HOME="${TEST_HOME}" \
+    PATH="${TEST_HOME}/hb/bin::.:/usr/bin:${TEST_HOME}/hb/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/hb" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"; source "$HOME/.config/dotfiles/profiles/agent.bash"
+     printf "%s\n" "$PATH"
+     case ":$PATH:" in *::*) exit 10 ;; esac
+     case ":$PATH:" in *":.:"*) exit 11 ;; esac
+     count=0
+     while IFS= read -r -d: entry; do
+       [[ "$entry" == "$HOME/.local/bin" ]] && count=$((count + 1))
+     done <<<"${PATH}:"
+     [[ "$count" -eq 1 ]] || exit 12'
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == "${TEST_HOME}/.local/bin:"* ]]
+  [[ "$output" == *"${TEST_HOME}/hb/bin"* ]]
+}
+
+@test "agent.bash is safe to source standalone and exports BASH_ENV" {
+  run env -u DOTFILES_CONFIG_DIR -u DOTFILES_PROFILE -u BASH_ENV \
+    HOME="${TEST_HOME}" PATH="/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.config/dotfiles/profiles/agent.bash"
+     printf "%s|%s|%s|%s" "$DOTFILES_PROFILE" "$PAGER" "$BASH_ENV" "$DOTFILES_CONFIG_DIR"'
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "agent|cat|${TEST_HOME}/.config/dotfiles/profiles/agent.bash|${TEST_HOME}/.config/dotfiles" ]
+}
+
+@test "BASH_ENV propagates agent environment to a nested bash -c" {
+  run env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"
+     bash --noprofile --norc -c '\''printf "%s|%s|%s" "$DOTFILES_PROFILE" "$PAGER" "$GIT_TERMINAL_PROMPT"'\'''
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "agent|cat|0" ]
+}
+
+@test "agent hygiene defaults are set for noninteractive automation" {
+  run env HOME="${TEST_HOME}" PATH="/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"
+     printf "%s|%s|%s|%s|%s|%s|%s|%s" \
+       "$EDITOR" "$VISUAL" "$HISTFILE" "$HISTSIZE" \
+       "$NO_COLOR" "$CLICOLOR" "$GIT_ASKPASS" "$SSH_ASKPASS_REQUIRE"'
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "true|true|/dev/null|0|1|0|true|never" ]
+}
+
+@test "load-human-profile resets agent automation defaults" {
+  local module
+  mkdir -p "${TEST_HOME}/.local/share/bash"
+  for module in paths exports aliases functions git-functions; do
+    printf '# test module\n' >"${TEST_HOME}/.local/share/bash/${module}.sh"
+  done
+  cat >"${TEST_HOME}/.local/share/bash/utility-functions.sh" <<'EOF'
+path_prepend() { PATH="$1:${PATH}"; }
+path_append() { PATH="${PATH}:$1"; }
+EOF
+  printf 'export EDITOR=vim\n' >"${TEST_HOME}/.local/share/bash/exports.sh"
+  printf '# test prompt\n' >"${TEST_HOME}/.bash_prompt"
+  cat >"${MOCK_BIN}/op" <<'EOF'
+#!/usr/bin/env bash
+[[ "$1" == "whoami" ]]
+EOF
+  chmod +x "${MOCK_BIN}/op"
+
+  run env -u BASH_ENV -u DOTFILES_SECRETS_FILE \
+    HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+    DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX}" \
+    DOTFILES_HUMAN_PROFILE="${TEST_HOME}/.config/dotfiles/profiles/human.bash" \
+    /opt/homebrew/bin/bash --noprofile --norc -c \
+    'source "$HOME/.bash_profile"
+     printf "before:%s|%s\n" "$PAGER" "${GIT_EDITOR:-unset}"
+     load-human-profile
+     printf "after:%s|%s|%s|%s|%s|%s" \
+       "$PAGER" "${GIT_EDITOR:-unset}" "${BASH_ENV:-unset}" \
+       "${HISTFILE:-unset}" "${NO_COLOR:-unset}" "$EDITOR"'
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"before:cat|true"* ]]
+  [[ "$output" == *"after:less|unset|unset|unset|unset|vim"* ]]
 }

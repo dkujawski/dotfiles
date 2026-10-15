@@ -19,10 +19,25 @@
 
 - Standard commands must not be replaced by aliases.
 - Pagers and Git editors must not block automation; Git credential prompting is disabled.
-- Homebrew and `~/.local/bin` are added without deleting or duplicating caller PATH entries.
+- Agent startup rewrites `PATH` with move-to-front promotion so managed directories always
+  take precedence, even when already present in an inherited `PATH`. Empty entries and
+  `.` are removed. Final precedence, highest first: pyenv `shims` and `bin` (when
+  `~/.pyenv` exists), `~/.local/bin`, Homebrew `libexec/gnubin` for `coreutils`,
+  `findutils`, `gnu-sed`, and `grep`, then Homebrew `bin` and `sbin`, then remaining
+  inherited entries (de-duplicated).
+- GNU userland is first for agents: `sed`, `grep`, `find`, `date`, and `readlink` resolve
+  from Homebrew gnubin directories when those formulae are installed.
 - When `~/.pyenv` exists, agent startup puts pyenv bin and shims on `PATH` so project
   `.python-version` files are honored; it must not run `pyenv init` or invoke pyenv.
+- Agent startup exports `BASH_ENV` to the agent profile so non-login, non-interactive
+  `bash -c` inherits the same environment. The per-process load guard keeps re-sourcing
+  cheap and correct.
+- Agent hygiene defaults disable interactive editors, askpass prompts, shell history,
+  color, and package update notifiers without calling external tools at startup.
 - Optional tool initialization is conditional and failures include an actionable remedy.
+- `load-human-profile` must reset agent automation defaults (`PAGER`, Git editors,
+  askpass, `BASH_ENV`, history, and color) before sourcing human modules so interactive
+  tools work.
 
 ## Human interactive performance
 

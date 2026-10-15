@@ -2,6 +2,7 @@
 
 setup() {
   bats_require_minimum_version 1.5.0
+  unset BASH_ENV
   REPO_ROOT="$(cd "${BATS_TEST_DIRNAME}/.." && pwd)"
   TEST_HOME="$(mktemp -d "${BATS_TEST_TMPDIR}/gh-home.XXXXXX")"
   MOCK_BIN="$(mktemp -d "${BATS_TEST_TMPDIR}/gh-bin.XXXXXX")"
@@ -60,7 +61,7 @@ EOF
   install_op_mock
   install_gh_mock
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
     "${REPO_ROOT}/tools/configure-gh.sh"
 
   [ "$status" -eq 0 ]
@@ -77,7 +78,7 @@ EOF
   install_op_mock
   install_gh_mock
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
     MOCK_GH_LOGIN_FAILURE=1 "${REPO_ROOT}/tools/configure-gh.sh"
 
   [ "$status" -eq 1 ]
@@ -100,7 +101,7 @@ exit 99
 EOF
   chmod +x "${MOCK_BIN}/op" "${MOCK_BIN}/gh"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
     "${REPO_ROOT}/tools/configure-gh.sh" --dry-run
 
   [ "$status" -eq 0 ]
@@ -112,7 +113,7 @@ EOF
 @test "reports an actionable error when gh is unavailable" {
   install_op_mock
 
-  run -127 env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run -127 env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
     "${REPO_ROOT}/tools/configure-gh.sh"
 
   [ "$status" -eq 127 ]
@@ -128,7 +129,7 @@ exit 1
 EOF
   chmod +x "${MOCK_BIN}/op"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" \
     "${REPO_ROOT}/tools/configure-gh.sh"
 
   [ "$status" -eq 1 ]
@@ -140,7 +141,7 @@ EOF
   install_op_mock
   install_gh_mock
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" MOCK_GH_TOKEN_MISMATCH=1 \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" MOCK_GH_TOKEN_MISMATCH=1 \
     "${REPO_ROOT}/tools/configure-gh.sh"
 
   [ "$status" -eq 1 ]

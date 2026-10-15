@@ -14,6 +14,11 @@
 
 ### Changed
 
+- Agent startup now enforces Homebrew/GNU-first `PATH` with move-to-front reordering,
+  drops empty and `.` entries, exports `BASH_ENV` for non-login shells, and sets
+  noninteractive hygiene defaults; `load-human-profile` resets those automation settings
+  before sourcing human modules. `agent-doctor` verifies tool provenance under Homebrew
+  and gnubin paths.
 - Default Make workflow now installs and deploys the coding-agent profile.
 - Home deployment is targeted and no longer overwrites generated Git configuration.
 - Live iTerm preferences are synchronized with the current laptop deployment.

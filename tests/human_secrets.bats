@@ -2,9 +2,10 @@
 
 setup() {
   bats_require_minimum_version 1.5.0
-  unset DOTFILES_AGENT_PROFILE_LOADED DOTFILES_CONFIG_DIR DOTFILES_HOMEBREW_PREFIX \
-    DOTFILES_HUMAN_PROFILE DOTFILES_HUMAN_SECRETS_FILE DOTFILES_OP_SSH_AUTH_SOCK \
-    DOTFILES_PROFILE DOTFILES_PROFILE_LOADED DOTFILES_SECRETS_FILE
+  unset BASH_ENV DOTFILES_AGENT_PROFILE_LOADED DOTFILES_CONFIG_DIR \
+    DOTFILES_HOMEBREW_PREFIX DOTFILES_HUMAN_PROFILE DOTFILES_HUMAN_SECRETS_FILE \
+    DOTFILES_OP_SSH_AUTH_SOCK DOTFILES_PROFILE DOTFILES_PROFILE_LOADED \
+    DOTFILES_SECRETS_FILE DOTFILES_SECRETS_HELPERS_LOADED
   REPO_ROOT="$(cd "${BATS_TEST_DIRNAME}/.." && pwd)"
   TEST_HOME="$(mktemp -d "${BATS_TEST_TMPDIR}/human-home.XXXXXX")"
   MOCK_BIN="$(mktemp -d "${BATS_TEST_TMPDIR}/human-bin.XXXXXX")"
@@ -35,7 +36,7 @@ EOF
   export OP_AUTHENTICATED_FILE="${TEST_HOME}/op-authenticated"
   export OP_SECRET_CALLED_FILE="${TEST_HOME}/op-secret-called"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     OP_AUTHENTICATED_FILE="${OP_AUTHENTICATED_FILE}" \
     OP_SECRET_CALLED_FILE="${OP_SECRET_CALLED_FILE}" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
@@ -57,7 +58,7 @@ EOF
 EOF
   chmod +x "${MOCK_BIN}/op"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; declare -F load-human-secrets >/dev/null; printf "shell-alive"'
 
@@ -79,7 +80,7 @@ GITHUB_TOKEN='scoped value' "$@"
 EOF
   chmod +x "${MOCK_BIN}/op"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; with-human-secrets -- bash -c '\''printf "%s" "$GITHUB_TOKEN"'\''; printf "|%s" "${GITHUB_TOKEN-unset}"'
 
@@ -96,7 +97,7 @@ printf 'value for %s' "$2"
 EOF
   chmod +x "${MOCK_BIN}/op"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; load-human-secrets; printf "%s" "$GITHUB_TOKEN"'
 
@@ -116,7 +117,7 @@ printf 'value for %s' "$2"
 EOF
   chmod +x "${MOCK_BIN}/op"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     DOTFILES_SECRETS_FILE="${TEST_HOME}/shared.env" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; load-human-secrets; printf "%s" "$SHARED_TOKEN"'
@@ -126,7 +127,7 @@ EOF
 }
 
 @test "human profile reports a missing op command" {
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     HOMEBREW_PREFIX="${TEST_HOME}/missing-homebrew" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"'
@@ -146,7 +147,7 @@ exit 98
 EOF
   chmod +x "${MOCK_BIN}/op"
 
-  run env HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
+  run env -u BASH_ENV HOME="${TEST_HOME}" PATH="${MOCK_BIN}:/usr/bin:/bin" DOTFILES_PROFILE=human \
     DOTFILES_HUMAN_SECRETS_FILE="${TEST_HOME}/invalid.env" \
     /opt/homebrew/bin/bash --noprofile --norc -c \
     'source "$HOME/.bash_profile"; load-human-secrets'

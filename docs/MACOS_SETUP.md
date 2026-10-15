@@ -53,6 +53,12 @@ plaintext cache directories. Those caches are intentionally not copied into the 
 When `~/.pyenv` exists, the agent profile puts pyenv bin and shims on `PATH` so project
 `.python-version` files resolve the correct Python without running `pyenv init`.
 
+The agent profile promotes Homebrew and GNU gnubin directories ahead of inherited system
+paths so Brewfile tools (`git`, `jq`, `rg`, …) and GNU `sed`/`grep`/`find`/`date`/`readlink`
+win over Apple or IDE-bundled binaries. Non-login `bash -c` inherits the same environment
+through `BASH_ENV`. `load-human-profile` resets those automation defaults before loading
+interactive modules.
+
 Human shells defer optional work: NVM loads on the first `nvm`, `node`, `npm`, or `npx`
 command, the global completion framework loads on the first completion request, and pyenv
 shell integration loads on the first `pyenv` command. Run `load-secrets` explicitly only
@@ -62,9 +68,10 @@ when legacy human-shell credentials are required.
 
 `make agent-doctor` checks the operating system, required commands, deployed profile,
 GitHub CLI SSH protocol, 1Password CLI state, and SSH socket without displaying keys or
-secrets. A missing 1Password session is a warning because shell startup and public
-repository work remain usable. An HTTPS Git protocol is an actionable failure; run
-`make configure-gh`.
+secrets. It also verifies that Brewfile tools resolve under the Homebrew prefix, that GNU
+userland commands resolve from gnubin paths, and that `PATH` has no empty or `.` entries.
+A missing 1Password session is a warning because shell startup and public repository work
+remain usable. An HTTPS Git protocol is an actionable failure; run `make configure-gh`.
 
 ## Recovery
 
